@@ -91,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onEnableAudio}
-            className="px-3 py-2 rounded-full bg-emerald-600 text-white text-[9px] md:text-[10px] font-black tracking-[0.25em] uppercase shadow-md hover:bg-emerald-700 transition-all"
+            className="hidden sm:inline-flex px-3 py-2 rounded-full bg-emerald-600 text-white text-[9px] md:text-[10px] font-black tracking-[0.25em] uppercase shadow-md hover:bg-emerald-700 transition-all"
           >
             Enable Sound
           </button>

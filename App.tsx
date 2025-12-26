@@ -78,6 +78,18 @@ const App: React.FC = () => {
         onEnableAudio={handleEnableAudio}
       />
 
+      {!audioReady && (
+        <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center sm:hidden">
+          <button
+            type="button"
+            onClick={handleEnableAudio}
+            className="px-5 py-3 rounded-full bg-emerald-600 text-white text-[10px] font-black tracking-[0.25em] uppercase shadow-lg hover:bg-emerald-700 transition-all"
+          >
+            Enable Sound
+          </button>
+        </div>
+      )}
+
       <main className="flex-1 flex flex-col items-center justify-center p-4 z-10">
         {activeTab === 'harp' ? (
           <div className="w-full max-w-5xl transition-all duration-1000 ease-in-out opacity-100 transform translate-y-0">
