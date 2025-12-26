@@ -172,8 +172,94 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
         ))}
       </div>
 
+      {/* Main Harp Section */}
+      <div className="relative w-full h-[540px] flex flex-col-reverse items-center justify-between py-6 z-10 mb-10">
+        {notes.map((note, idx) => (
+          <div 
+            key={note.label}
+            className="group relative flex items-center justify-center w-full cursor-pointer h-14"
+            onClick={() => handleInteraction(note.freq, note.label, idx, note.color)}
+          >
+            <div className={`absolute h-12 rounded-full blur-[50px] transition-all duration-1000 ${activeNotes[note.label] ? 'opacity-80 scale-150' : 'opacity-10'}`} 
+                 style={{ width: `${note.width}%`, backgroundColor: note.color }}></div>
+
+            <div 
+              className={`relative h-9 md:h-11 rounded-full border-[2.5px] transition-all duration-700 transform group-hover:scale-y-110 shadow-xl overflow-hidden backdrop-blur-2xl`}
+              style={{ 
+                width: `${note.width}%`,
+                borderColor: activeNotes[note.label] ? '#fff' : `${note.color}88`,
+                background: activeNotes[note.label] 
+                  ? `linear-gradient(to right, ${note.color}44, #fff, ${note.color}44)` 
+                  : `linear-gradient(to right, rgba(255,255,255,0.98), ${note.color}22, rgba(255,255,255,0.98))`,
+                boxShadow: activeNotes[note.label] 
+                  ? `0 0 70px 25px ${note.color}77, inset 0 0 35px #fff` 
+                  : `0 8px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,1)`,
+              }}
+            >
+              <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white to-transparent pointer-events-none opacity-90"></div>
+              <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 ${canAnimate ? 'animate-glass-sweep' : ''} opacity-70`}></div>
+              {activeNotes[note.label] && (
+                <div className={`absolute inset-0 w-full h-full bg-white opacity-40 ${canAnimate ? 'animate-pulse' : ''} rounded-full`}></div>
+              )}
+              <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] md:text-[12px] font-black tracking-[0.7em] uppercase transition-all duration-700 ${activeNotes[note.label] ? 'opacity-100 scale-110 text-emerald-900' : 'opacity-30 text-emerald-800'}`}>
+                {note.label}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Primary Performance Buttons */}
+      <div className="w-full flex flex-wrap justify-center gap-4 mb-10 z-20">
+        <button 
+          className="group px-8 py-4 rounded-full bg-emerald-600 text-white shadow-lg hover:shadow-emerald-200/50 hover:bg-emerald-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95"
+          onClick={() => playChord([0, 2, 4, 7])}
+        >
+          Sacred Root
+        </button>
+        <button 
+          className="group px-8 py-4 rounded-full bg-teal-600 text-white shadow-lg hover:shadow-teal-200/50 hover:bg-teal-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95"
+          onClick={() => playChord([2, 4, 6, 7])}
+        >
+          Spirit Heart
+        </button>
+        <button 
+          className="group px-8 py-4 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-blue-200/50 hover:bg-blue-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3"
+          onClick={() => playGlissando('up')}
+        >
+          Ascend
+        </button>
+        <button 
+          className="group px-8 py-4 rounded-full bg-indigo-600 text-white shadow-lg hover:shadow-indigo-200/50 hover:bg-indigo-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3"
+          onClick={() => playGlissando('down')}
+        >
+          Descend
+        </button>
+      </div>
+
+      {/* Footer Controls */}
+      <div className="w-full flex justify-center gap-6 z-20 mb-10">
+        <button 
+          className="px-10 py-5 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black tracking-[0.4em] text-[11px] uppercase transition-all shadow-xl shadow-emerald-200/50 hover:scale-[1.03] active:scale-95"
+          onClick={() => {
+            notes.forEach((n, i) => {
+              setTimeout(() => handleInteraction(n.freq, n.label, i, n.color, sustain + 8.0), i * 350);
+            });
+          }}
+        >
+          Forest Cascade
+        </button>
+        <button 
+          className="group px-8 py-4 text-emerald-900/40 hover:text-rose-600 font-black tracking-[0.4em] text-[10px] uppercase transition-all flex items-center gap-3 bg-white/40 backdrop-blur-xl rounded-full border border-white/60"
+          onClick={stopAll}
+        >
+          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3" /></svg>
+          Silence
+        </button>
+      </div>
+
       {/* Control Panel (Sliders) */}
-      <div className="w-full max-w-5xl z-20 mb-10">
+      <div className="w-full max-w-5xl z-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-10 py-8 bg-white/40 backdrop-blur-[40px] border border-white/80 rounded-[3rem] shadow-xl">
           
           {/* Glissando Speed */}
@@ -218,92 +304,6 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Primary Performance Buttons */}
-      <div className="w-full flex flex-wrap justify-center gap-4 mb-10 z-20">
-        <button 
-          className="group px-8 py-4 rounded-full bg-emerald-600 text-white shadow-lg hover:shadow-emerald-200/50 hover:bg-emerald-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95"
-          onClick={() => playChord([0, 2, 4, 7])}
-        >
-          Sacred Root
-        </button>
-        <button 
-          className="group px-8 py-4 rounded-full bg-teal-600 text-white shadow-lg hover:shadow-teal-200/50 hover:bg-teal-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95"
-          onClick={() => playChord([2, 4, 6, 7])}
-        >
-          Spirit Heart
-        </button>
-        <button 
-          className="group px-8 py-4 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-blue-200/50 hover:bg-blue-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3"
-          onClick={() => playGlissando('up')}
-        >
-          Ascend
-        </button>
-        <button 
-          className="group px-8 py-4 rounded-full bg-indigo-600 text-white shadow-lg hover:shadow-indigo-200/50 hover:bg-indigo-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3"
-          onClick={() => playGlissando('down')}
-        >
-          Descend
-        </button>
-      </div>
-
-      {/* Main Harp Section */}
-      <div className="relative w-full h-[540px] flex flex-col-reverse items-center justify-between py-6 z-10">
-        {notes.map((note, idx) => (
-          <div 
-            key={note.label}
-            className="group relative flex items-center justify-center w-full cursor-pointer h-14"
-            onClick={() => handleInteraction(note.freq, note.label, idx, note.color)}
-          >
-            <div className={`absolute h-12 rounded-full blur-[50px] transition-all duration-1000 ${activeNotes[note.label] ? 'opacity-80 scale-150' : 'opacity-10'}`} 
-                 style={{ width: `${note.width}%`, backgroundColor: note.color }}></div>
-
-            <div 
-              className={`relative h-9 md:h-11 rounded-full border-[2.5px] transition-all duration-700 transform group-hover:scale-y-110 shadow-xl overflow-hidden backdrop-blur-2xl`}
-              style={{ 
-                width: `${note.width}%`,
-                borderColor: activeNotes[note.label] ? '#fff' : `${note.color}88`,
-                background: activeNotes[note.label] 
-                  ? `linear-gradient(to right, ${note.color}44, #fff, ${note.color}44)` 
-                  : `linear-gradient(to right, rgba(255,255,255,0.98), ${note.color}22, rgba(255,255,255,0.98))`,
-                boxShadow: activeNotes[note.label] 
-                  ? `0 0 70px 25px ${note.color}77, inset 0 0 35px #fff` 
-                  : `0 8px 30px rgba(0,0,0,0.05), inset 0 0 15px rgba(255,255,255,1)`,
-              }}
-            >
-              <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white to-transparent pointer-events-none opacity-90"></div>
-              <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 ${canAnimate ? 'animate-glass-sweep' : ''} opacity-70`}></div>
-              {activeNotes[note.label] && (
-                <div className={`absolute inset-0 w-full h-full bg-white opacity-40 ${canAnimate ? 'animate-pulse' : ''} rounded-full`}></div>
-              )}
-              <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] md:text-[12px] font-black tracking-[0.7em] uppercase transition-all duration-700 ${activeNotes[note.label] ? 'opacity-100 scale-110 text-emerald-900' : 'opacity-30 text-emerald-800'}`}>
-                {note.label}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Footer Controls */}
-      <div className="mt-12 w-full flex justify-center gap-6 z-20">
-        <button 
-          className="px-10 py-5 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black tracking-[0.4em] text-[11px] uppercase transition-all shadow-xl shadow-emerald-200/50 hover:scale-[1.03] active:scale-95"
-          onClick={() => {
-            notes.forEach((n, i) => {
-              setTimeout(() => handleInteraction(n.freq, n.label, i, n.color, sustain + 8.0), i * 350);
-            });
-          }}
-        >
-          Forest Cascade
-        </button>
-        <button 
-          className="group px-8 py-4 text-emerald-900/40 hover:text-rose-600 font-black tracking-[0.4em] text-[10px] uppercase transition-all flex items-center gap-3 bg-white/40 backdrop-blur-xl rounded-full border border-white/60"
-          onClick={stopAll}
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3" /></svg>
-          Silence
-        </button>
       </div>
 
       <style>{`
