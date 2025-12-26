@@ -3,6 +3,8 @@ export class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
   private reverbNode: ConvolverNode | null = null;
+  private dryGain: GainNode | null = null;
+  private wetGain: GainNode | null = null;
   private activeOscillators: Set<{ oscs: OscillatorNode[], gain: GainNode }> = new Set();
   private activeBuffers: Set<{ source: AudioBufferSourceNode, gain: GainNode }> = new Set();
   private samplesPromise: Promise<void> | null = null;
@@ -24,16 +26,22 @@ export class AudioService {
       this.masterGain = this.ctx.createGain();
       this.masterGain.gain.value = 0.5;
       this.masterGain.connect(this.ctx.destination);
+      this.dryGain = this.ctx.createGain();
+      this.wetGain = this.ctx.createGain();
+      this.dryGain.gain.value = 0.75;
+      this.wetGain.gain.value = 0.25;
+      this.dryGain.connect(this.masterGain);
+      this.wetGain.connect(this.masterGain);
       this.setupReverb();
       this.loadSamples();
     }
   }
 
   private async setupReverb() {
-    if (!this.ctx || !this.masterGain) return;
-    
-    // 8-second lush impulse response for a deep meditative hall sound
-    const length = this.ctx.sampleRate * 8.0;
+    if (!this.ctx || !this.masterGain || !this.wetGain) return;
+
+    // Shorter impulse response for a cleaner, less washy sound
+    const length = this.ctx.sampleRate * 4.0;
     const impulse = this.ctx.createBuffer(2, length, this.ctx.sampleRate);
     for (let i = 0; i < 2; i++) {
       const channelData = impulse.getChannelData(i);
@@ -44,7 +52,7 @@ export class AudioService {
     
     this.reverbNode = this.ctx.createConvolver();
     this.reverbNode.buffer = impulse;
-    this.reverbNode.connect(this.masterGain);
+    this.reverbNode.connect(this.wetGain);
   }
 
   private normalizeNoteLabel(label: string) {
@@ -147,6 +155,7 @@ export class AudioService {
     gain.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
 
     source.connect(gain);
+    if (this.dryGain) gain.connect(this.dryGain);
     gain.connect(this.reverbNode);
     source.start();
     source.stop(now + totalDuration + 0.05);
@@ -204,6 +213,7 @@ export class AudioService {
     // Deep fade out (8 seconds total)
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
 
+    if (this.dryGain) gain.connect(this.dryGain);
     gain.connect(this.reverbNode!);
     
     oscillators.forEach(osc => osc.start());
