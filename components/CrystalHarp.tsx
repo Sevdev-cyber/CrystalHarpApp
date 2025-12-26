@@ -115,7 +115,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
   };
 
   return (
-    <div className="relative flex flex-col items-center w-full max-w-6xl mx-auto min-h-screen select-none px-6 pb-20">
+    <div className="relative flex flex-col items-center w-full max-w-6xl mx-auto select-none px-6 pb-20">
       
       {/* Background Sound Layer */}
       <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center opacity-40">

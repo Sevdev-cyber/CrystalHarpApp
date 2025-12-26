@@ -8,6 +8,11 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <style>
+    html, body {
+      height: 100%;
+      width: 100%;
+      overscroll-behavior: contain;
+    }
     body {
       font-family: 'Quicksand', sans-serif;
       margin: 0;
@@ -16,6 +21,10 @@
       overflow-x: hidden;
       background: #fdfdfd;
       min-height: 100vh;
+      min-height: 100svh;
+    }
+    #root {
+      min-height: 100%;
     }
     h1, h2, h3 {
       font-family: 'Playfair+Display', serif;
