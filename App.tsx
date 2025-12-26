@@ -15,6 +15,8 @@ const App: React.FC = () => {
   const [lastActivity, setLastActivity] = useState<number>(Date.now());
   const [lowPower, setLowPower] = useState(false);
   const [audioReady, setAudioReady] = useState(() => audioService.isRunning());
+  const [isVisible, setIsVisible] = useState(true);
+  const [isIdle, setIsIdle] = useState(false);
 
   const handleActivity = () => {
     setLastActivity(Date.now());
@@ -50,15 +52,34 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const updateVisibility = () => setIsVisible(!document.hidden);
+    updateVisibility();
+    document.addEventListener('visibilitychange', updateVisibility);
+    return () => document.removeEventListener('visibilitychange', updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (!lowPower) {
+      setIsIdle(false);
+      return;
+    }
+    setIsIdle(false);
+    const timeout = setTimeout(() => setIsIdle(true), 5000);
+    return () => clearTimeout(timeout);
+  }, [lastActivity, lowPower]);
+
+  useEffect(() => {
     audioService.setVolume(isMuted ? 0 : volume);
   }, [volume, isMuted]);
 
   const pulseClass = lowPower ? '' : 'animate-pulse';
+  const motionEnabled = isVisible && (!lowPower || !isIdle);
 
   return (
     <div className="relative min-h-screen w-full flex flex-col bg-white overflow-hidden select-none transition-colors duration-1000">
       {/* Dynamic Ethereal Forest Background Visualization */}
-      <BackgroundDynamics activityIntensity={lastActivity} lowPower={lowPower} />
+      <BackgroundDynamics activityIntensity={lastActivity} lowPower={lowPower} motionEnabled={motionEnabled} />
 
       {/* Decorative Forest/Crystal Light Elements */}
       <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-100/30 rounded-full blur-glow ${pulseClass}`}></div>
@@ -107,6 +128,7 @@ const App: React.FC = () => {
               notes={SCALES[currentScale]} 
               onInteract={handleActivity}
               lowPower={lowPower}
+              motionEnabled={motionEnabled}
             />
           </div>
         ) : (

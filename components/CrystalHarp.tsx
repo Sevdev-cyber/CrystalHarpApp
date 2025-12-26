@@ -17,9 +17,10 @@ interface CrystalHarpProps {
   notes: ScaleNote[];
   onInteract: () => void;
   lowPower?: boolean;
+  motionEnabled?: boolean;
 }
 
-const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower = false }) => {
+const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower = false, motionEnabled = true }) => {
   const [activeNotes, setActiveNotes] = useState<Record<string, boolean>>({});
   const [particles, setParticles] = useState<Particle[]>([]);
   const [waveAmplitude, setWaveAmplitude] = useState(0);
@@ -28,8 +29,15 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
   const requestRef = useRef<number | null>(null);
   const [time, setTime] = useState(0);
   const waveSegments = lowPower ? 40 : 80;
+  const canAnimate = motionEnabled && !lowPower;
 
   useEffect(() => {
+    if (!motionEnabled) {
+      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      requestRef.current = null;
+      setWaveAmplitude(0);
+      return;
+    }
     let lastFrame = 0;
     const frameInterval = lowPower ? 1000 / 24 : 1000 / 60;
     const decay = lowPower ? 0.9 : 0.96;
@@ -46,7 +54,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [lowPower]);
+  }, [lowPower, motionEnabled]);
 
   const spawnParticles = (idx: number, color: string) => {
     const newParticles: Particle[] = [];
@@ -149,7 +157,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
         {particles.map((p) => (
           <div
             key={p.id}
-            className={`absolute rounded-full ${lowPower ? 'blur-[60px] opacity-20' : 'blur-[100px] animate-ethereal-glow opacity-0'}`}
+            className={`absolute rounded-full ${lowPower || !motionEnabled ? 'blur-[60px] opacity-20' : 'blur-[100px] animate-ethereal-glow opacity-0'}`}
             style={{
               left: `${p.x}%`,
               bottom: `${p.y}%`,
@@ -265,9 +273,9 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
               }}
             >
               <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white to-transparent pointer-events-none opacity-90"></div>
-              <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 ${lowPower ? '' : 'animate-glass-sweep'} opacity-70`}></div>
+              <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 ${canAnimate ? 'animate-glass-sweep' : ''} opacity-70`}></div>
               {activeNotes[note.label] && (
-                <div className={`absolute inset-0 w-full h-full bg-white opacity-40 ${lowPower ? '' : 'animate-pulse'} rounded-full`}></div>
+                <div className={`absolute inset-0 w-full h-full bg-white opacity-40 ${canAnimate ? 'animate-pulse' : ''} rounded-full`}></div>
               )}
               <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] md:text-[12px] font-black tracking-[0.7em] uppercase transition-all duration-700 ${activeNotes[note.label] ? 'opacity-100 scale-110 text-emerald-900' : 'opacity-30 text-emerald-800'}`}>
                 {note.label}

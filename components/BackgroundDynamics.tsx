@@ -4,9 +4,10 @@ import React, { useEffect, useState, useRef } from 'react';
 interface BackgroundDynamicsProps {
   activityIntensity: number;
   lowPower?: boolean;
+  motionEnabled?: boolean;
 }
 
-const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensity, lowPower = false }) => {
+const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensity, lowPower = false, motionEnabled = true }) => {
   const [blobs, setBlobs] = useState<{ id: number; x: number; y: number; size: number; color: string; duration: number; delay: number }[]>([]);
 
   useEffect(() => {
@@ -33,10 +34,11 @@ const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensi
   const [activeIntensity, setActiveIntensity] = useState(1);
   useEffect(() => {
     if (lowPower) return;
+    if (!motionEnabled) return;
     setActiveIntensity(1.5);
     const timeout = setTimeout(() => setActiveIntensity(1), 2000);
     return () => clearTimeout(timeout);
-  }, [activityIntensity, lowPower]);
+  }, [activityIntensity, lowPower, motionEnabled]);
 
   const blurClass = lowPower ? 'blur-[60px]' : 'blur-[100px]';
 
@@ -52,10 +54,10 @@ const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensi
             width: `${blob.size}px`,
             height: `${blob.size}px`,
             backgroundColor: blob.color,
-            animation: lowPower ? 'none' : `float-blob ${blob.duration}s infinite linear`,
+            animation: lowPower || !motionEnabled ? 'none' : `float-blob ${blob.duration}s infinite linear`,
             animationDelay: `${blob.delay}s`,
-            transform: lowPower ? 'scale(1)' : `scale(${activeIntensity})`,
-            opacity: lowPower ? 0.12 : 0.15 + (activeIntensity - 1) * 0.1
+            transform: lowPower || !motionEnabled ? 'scale(1)' : `scale(${activeIntensity})`,
+            opacity: lowPower || !motionEnabled ? 0.12 : 0.15 + (activeIntensity - 1) * 0.1
           }}
         />
       ))}
