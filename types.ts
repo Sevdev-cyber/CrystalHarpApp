@@ -50,11 +50,21 @@ const noteToFreq = (label: string, a4 = A4_REF_HZ) => {
 export type ScaleType = 
   | 'Chakra C' 
   | 'Celtic Moon D' 
-  | 'Sun D' 
+  | 'Celestial Sun D' 
   | 'Earth Om C#' 
   | 'Mystic E' 
   | 'Stardust C#' 
   | 'Planetary C';
+
+export const SCALE_ORDER: ScaleType[] = [
+  'Chakra C',
+  'Celtic Moon D',
+  'Celestial Sun D',
+  'Earth Om C#',
+  'Stardust C#',
+  'Mystic E',
+  'Planetary C'
+];
 
 // Frequencies shifted up one octave (multiplied by 2) for that higher crystal bowl sound
 export const SCALES: Record<ScaleType, ScaleNote[]> = {
@@ -74,11 +84,11 @@ export const SCALES: Record<ScaleType, ScaleNote[]> = {
     { label: 'F5', freq: noteToFreq('F5'), color: '#A5B4FC', width: 85 },
     { label: 'G5', freq: noteToFreq('G5'), color: '#C4B5FD', width: 80 },
     { label: 'A5', freq: noteToFreq('A5'), color: '#DDD6FE', width: 75 },
-    { label: 'Bb5', freq: noteToFreq('Bb5'), color: '#E9D5FF', width: 70 },
-    { label: 'C6', freq: noteToFreq('C6'), color: '#F3E8FF', width: 65 },
-    { label: 'D6', freq: noteToFreq('D6'), color: '#FFFFFF', width: 60 },
+    { label: 'C6', freq: noteToFreq('C6'), color: '#E9D5FF', width: 70 },
+    { label: 'D6', freq: noteToFreq('D6'), color: '#F3E8FF', width: 65 },
+    { label: 'E6', freq: noteToFreq('E6'), color: '#FFFFFF', width: 60 },
   ],
-  'Sun D': [
+  'Celestial Sun D': [
     { label: 'D5', freq: noteToFreq('D5'), color: '#FDE68A', width: 95 },
     { label: 'E5', freq: noteToFreq('E5'), color: '#FCD34D', width: 90 },
     { label: 'F#5', freq: noteToFreq('F#5'), color: '#FBBF24', width: 85 },
@@ -90,13 +100,13 @@ export const SCALES: Record<ScaleType, ScaleNote[]> = {
   ],
   'Earth Om C#': [
     { label: 'C#5', freq: noteToFreq('C#5'), color: '#86EFAC', width: 95 },
-    { label: 'D#5', freq: noteToFreq('D#5'), color: '#4ADE80', width: 90 },
-    { label: 'E5', freq: noteToFreq('E5'), color: '#22C55E', width: 85 },
-    { label: 'F#5', freq: noteToFreq('F#5'), color: '#16A34A', width: 80 },
-    { label: 'G#5', freq: noteToFreq('G#5'), color: '#15803D', width: 75 },
-    { label: 'A5', freq: noteToFreq('A5'), color: '#166534', width: 70 },
-    { label: 'B5', freq: noteToFreq('B5'), color: '#14532D', width: 65 },
-    { label: 'C#6', freq: noteToFreq('C#6'), color: '#DCFCE7', width: 60 },
+    { label: 'E5', freq: noteToFreq('E5'), color: '#4ADE80', width: 90 },
+    { label: 'F#5', freq: noteToFreq('F#5'), color: '#22C55E', width: 85 },
+    { label: 'G#5', freq: noteToFreq('G#5'), color: '#16A34A', width: 80 },
+    { label: 'A5', freq: noteToFreq('A5'), color: '#15803D', width: 75 },
+    { label: 'B5', freq: noteToFreq('B5'), color: '#166534', width: 70 },
+    { label: 'C#6', freq: noteToFreq('C#6'), color: '#14532D', width: 65 },
+    { label: 'E6', freq: noteToFreq('E6'), color: '#DCFCE7', width: 60 },
   ],
   'Mystic E': [
     { label: 'E5', freq: noteToFreq('E5'), color: '#F9A8D4', width: 95 },
@@ -105,18 +115,18 @@ export const SCALES: Record<ScaleType, ScaleNote[]> = {
     { label: 'A5', freq: noteToFreq('A5'), color: '#DB2777', width: 80 },
     { label: 'B5', freq: noteToFreq('B5'), color: '#BE185D', width: 75 },
     { label: 'C6', freq: noteToFreq('C6'), color: '#9D174D', width: 70 },
-    { label: 'D#6', freq: noteToFreq('D#6'), color: '#831843', width: 65 },
+    { label: 'D6', freq: noteToFreq('D6'), color: '#831843', width: 65 },
     { label: 'E6', freq: noteToFreq('E6'), color: '#FFF1F2', width: 60 },
   ],
   'Stardust C#': [
     { label: 'C#5', freq: noteToFreq('C#5'), color: '#E9D5FF', width: 95 },
-    { label: 'E5', freq: noteToFreq('E5'), color: '#D8B4FE', width: 90 },
-    { label: 'F#5', freq: noteToFreq('F#5'), color: '#C084FC', width: 85 },
-    { label: 'G#5', freq: noteToFreq('G#5'), color: '#A855F7', width: 80 },
-    { label: 'B5', freq: noteToFreq('B5'), color: '#9333EA', width: 75 },
-    { label: 'C#6', freq: noteToFreq('C#6'), color: '#7E22CE', width: 70 },
-    { label: 'E6', freq: noteToFreq('E6'), color: '#6B21A8', width: 65 },
-    { label: 'F#6', freq: noteToFreq('F#6'), color: '#FAF5FF', width: 60 },
+    { label: 'D#5', freq: noteToFreq('D#5'), color: '#D8B4FE', width: 90 },
+    { label: 'E5', freq: noteToFreq('E5'), color: '#C084FC', width: 85 },
+    { label: 'F#5', freq: noteToFreq('F#5'), color: '#A855F7', width: 80 },
+    { label: 'G#5', freq: noteToFreq('G#5'), color: '#9333EA', width: 75 },
+    { label: 'A5', freq: noteToFreq('A5'), color: '#7E22CE', width: 70 },
+    { label: 'B5', freq: noteToFreq('B5'), color: '#6B21A8', width: 65 },
+    { label: 'C#6', freq: noteToFreq('C#6'), color: '#FAF5FF', width: 60 },
   ],
   'Planetary C': [
     { label: 'C5', freq: noteToFreq('C5'), color: '#BAE6FD', width: 95 },
@@ -128,4 +138,42 @@ export const SCALES: Record<ScaleType, ScaleNote[]> = {
     { label: 'Bb5', freq: noteToFreq('Bb5'), color: '#075985', width: 65 },
     { label: 'C6', freq: noteToFreq('C6'), color: '#F0F9FF', width: 60 },
   ]
+};
+
+export const SCALE_INFO: Record<ScaleType, { title: string; subtitle: string; notes: string }> = {
+  'Chakra C': {
+    title: 'Chakra C',
+    subtitle: 'Pure resonance',
+    notes: 'C5, D5, E5, F5, G5, A5, H5, C6'
+  },
+  'Celtic Moon D': {
+    title: 'Celtic Moon D',
+    subtitle: 'Lunar energy',
+    notes: 'D5, E5, F5, G5, A5, C6, D6, E6'
+  },
+  'Celestial Sun D': {
+    title: 'Celestial Sun D',
+    subtitle: 'Solar radiance',
+    notes: 'D5, E5, F#5, G5, A5, B5/H5, C#6, D6'
+  },
+  'Earth Om C#': {
+    title: 'Earth Om C#',
+    subtitle: 'Ancient roots',
+    notes: '5C#, 5E, 5F#, 5G#, 5A, 5B, 6C#, 6E'
+  },
+  'Stardust C#': {
+    title: 'Stardust C#',
+    subtitle: 'Luminous, sparkling',
+    notes: '5C#, 5D#, 5E, 5F#, 5G#, 5A, 5B, 6C#'
+  },
+  'Mystic E': {
+    title: 'Mystic E',
+    subtitle: 'Inner vision',
+    notes: 'E5, F5, G#5, A5, B5, C6, D6, E6'
+  },
+  'Planetary C': {
+    title: 'Planetary C',
+    subtitle: 'Planetary resonance',
+    notes: 'C5, D5, Eb5, F5, G5, Ab5, Bb5, C6'
+  }
 };
