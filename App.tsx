@@ -87,7 +87,6 @@ const App: React.FC = () => {
   }, [volume, isMuted]);
 
   const embeddedScrollLock = isEmbedded;
-  const compactLayout = isEmbedded && lowPower;
   const reducedEffects = lowPower;
   const autoPause = lowPower || isEmbedded;
   const pulseClass = reducedEffects ? '' : 'animate-pulse';
@@ -134,22 +133,21 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className={`flex-1 flex flex-col items-center min-h-0 z-10 ${compactLayout ? 'justify-start pt-2 pb-4 px-3' : 'justify-center p-4'} ${embeddedScrollLock ? 'overflow-y-auto overscroll-contain' : ''}`}>
+      <main className={`flex-1 flex flex-col items-center justify-center p-4 min-h-0 z-10 ${embeddedScrollLock ? 'overflow-y-auto overscroll-contain' : ''}`}>
         <div className="w-full max-w-5xl transition-all duration-1000 ease-in-out opacity-100 transform translate-y-0">
-          <div className={`text-center ${compactLayout ? 'mb-4' : 'mb-8'}`}>
-            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 text-iridescent italic px-4">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-6xl font-bold mb-3 text-iridescent italic px-4">
               Sacred Forest Crystal Harp
             </h2>
-            <p className={`text-emerald-800/50 text-[10px] md:text-xs tracking-[0.5em] uppercase font-bold ${compactLayout ? 'leading-4' : ''}`}>
+            <p className="text-emerald-800/50 text-[10px] md:text-xs tracking-[0.5em] uppercase font-bold">
               {SCALE_INFO[currentScale].subtitle} • 432 Hz
             </p>
           </div>
 
-          <div className={compactLayout ? 'mb-6' : 'mb-10'}>
+          <div className="mb-10">
             <ScaleWheel
               currentScale={currentScale}
               onSelect={setCurrentScale}
-              compact={compactLayout}
             />
           </div>
 
@@ -158,12 +156,11 @@ const App: React.FC = () => {
             onInteract={handleActivity}
             lowPower={lowPower}
             motionEnabled={motionEnabled}
-            compact={compactLayout}
           />
         </div>
       </main>
 
-      <footer className={`absolute bottom-6 left-0 right-0 text-center text-emerald-900/20 text-[9px] uppercase tracking-[0.6em] pointer-events-none font-bold ${compactLayout ? 'hidden' : ''}`}>
+      <footer className="absolute bottom-6 left-0 right-0 text-center text-emerald-900/20 text-[9px] uppercase tracking-[0.6em] pointer-events-none font-bold">
         Sacred Forest Ancient Resonance
       </footer>
     </div>
