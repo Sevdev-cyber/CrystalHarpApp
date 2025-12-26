@@ -79,14 +79,16 @@ const App: React.FC = () => {
       />
 
       {!audioReady && (
-        <div className="fixed bottom-4 left-0 right-0 z-40 flex justify-center sm:hidden">
-          <button
-            type="button"
-            onClick={handleEnableAudio}
-            className="px-5 py-3 rounded-full bg-emerald-600 text-white text-[10px] font-black tracking-[0.25em] uppercase shadow-lg hover:bg-emerald-700 transition-all"
-          >
-            Enable Sound
-          </button>
+        <div className="fixed inset-0 z-50 flex items-center justify-center sm:hidden pointer-events-none">
+          <div className="pointer-events-auto rounded-full bg-white/90 backdrop-blur-xl px-6 py-4 shadow-xl border border-white/80">
+            <button
+              type="button"
+              onClick={handleEnableAudio}
+              className="text-emerald-700 text-[10px] font-black tracking-[0.25em] uppercase"
+            >
+              Enable Sound
+            </button>
+          </div>
         </div>
       )}
 
