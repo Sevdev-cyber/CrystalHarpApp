@@ -16,34 +16,42 @@ interface Particle {
 interface CrystalHarpProps {
   notes: ScaleNote[];
   onInteract: () => void;
+  lowPower?: boolean;
 }
 
-const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
+const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower = false }) => {
   const [activeNotes, setActiveNotes] = useState<Record<string, boolean>>({});
   const [particles, setParticles] = useState<Particle[]>([]);
   const [waveAmplitude, setWaveAmplitude] = useState(0);
   const [glissandoSpeed, setGlissandoSpeed] = useState(300); 
   const [sustain, setSustain] = useState(10.0); 
-  const requestRef = useRef<number>(null);
+  const requestRef = useRef<number | null>(null);
   const [time, setTime] = useState(0);
-
-  const animate = useCallback((t: number) => {
-    setTime(t / 1000);
-    setWaveAmplitude(prev => Math.max(0, prev * 0.96));
-    requestRef.current = requestAnimationFrame(animate);
-  }, []);
+  const waveSegments = lowPower ? 40 : 80;
 
   useEffect(() => {
+    let lastFrame = 0;
+    const frameInterval = lowPower ? 1000 / 24 : 1000 / 60;
+    const decay = lowPower ? 0.9 : 0.96;
+    const animate = (t: number) => {
+      if (t - lastFrame >= frameInterval) {
+        lastFrame = t;
+        setTime(t / 1000);
+        setWaveAmplitude(prev => Math.max(0, prev * decay));
+      }
+      requestRef.current = requestAnimationFrame(animate);
+    };
+
     requestRef.current = requestAnimationFrame(animate);
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [animate]);
+  }, [lowPower]);
 
   const spawnParticles = (idx: number, color: string) => {
     const newParticles: Particle[] = [];
     // Creating "Light Blooms" rather than sharp particles
-    const count = 3; 
+    const count = lowPower ? 1 : 3; 
     const yPos = 85 - (idx * (75 / Math.max(1, notes.length - 1 || 1))); 
 
     for (let i = 0; i < count; i++) {
@@ -53,15 +61,15 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
         y: yPos,
         color,
         angle: (Math.random() * (Math.PI / 2)) - (Math.PI / 4) - (Math.PI / 2), // Drift slowly upwards
-        speed: 0.1 + Math.random() * 0.3, // Ultra slow movement
-        size: 250 + Math.random() * 300, // Massive soft blooms
+        speed: 0.08 + Math.random() * (lowPower ? 0.15 : 0.3), // Ultra slow movement
+        size: (lowPower ? 160 : 250) + Math.random() * (lowPower ? 200 : 300), // Massive soft blooms
       });
     }
     setParticles(prev => [...prev, ...newParticles]);
     
     setTimeout(() => {
       setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
-    }, 8000); // Longer lifespan for softer transition
+    }, lowPower ? 5000 : 8000); // Longer lifespan for softer transition
   };
 
   const handleInteraction = useCallback((freq: number, label: string, idx: number, color: string, duration?: number) => {
@@ -70,7 +78,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
     onInteract();
     setActiveNotes(prev => ({ ...prev, [label]: true }));
     spawnParticles(idx, color);
-    setWaveAmplitude(prev => Math.min(250, prev + 45));
+    setWaveAmplitude(prev => Math.min(lowPower ? 180 : 250, prev + (lowPower ? 25 : 45)));
     
     setTimeout(() => {
       setActiveNotes(prev => ({ ...prev, [label]: false }));
@@ -102,9 +110,8 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
     setWaveAmplitude(0);
   };
 
-  const renderWave = (offset: number, speedMult: number, freqMult: number) => {
+  const renderWave = (offset: number, speedMult: number, freqMult: number, segments: number) => {
     const points = [];
-    const segments = 80;
     for (let i = 0; i <= segments; i++) {
       const x = (i / segments) * 100;
       const sinVal = Math.sin((time * speedMult) + (i * freqMult) + offset);
@@ -120,8 +127,8 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
       {/* Background Sound Layer */}
       <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center opacity-40">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full scale-110">
-          <polyline points={renderWave(0, 0.3, 0.05)} fill="none" stroke="url(#forestWave1)" strokeWidth="0.4" />
-          <polyline points={renderWave(Math.PI, 0.2, 0.04)} fill="none" stroke="url(#forestWave2)" strokeWidth="0.3" />
+          <polyline points={renderWave(0, 0.3, 0.05, waveSegments)} fill="none" stroke="url(#forestWave1)" strokeWidth="0.4" />
+          <polyline points={renderWave(Math.PI, 0.2, 0.04, waveSegments)} fill="none" stroke="url(#forestWave2)" strokeWidth="0.3" />
           <defs>
             <linearGradient id="forestWave1" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#059669" stopOpacity="0" />
@@ -142,7 +149,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
         {particles.map((p) => (
           <div
             key={p.id}
-            className="absolute rounded-full blur-[100px] animate-ethereal-glow opacity-0"
+            className={`absolute rounded-full ${lowPower ? 'blur-[60px] opacity-20' : 'blur-[100px] animate-ethereal-glow opacity-0'}`}
             style={{
               left: `${p.x}%`,
               bottom: `${p.y}%`,
@@ -258,9 +265,9 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
               }}
             >
               <div className="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white to-transparent pointer-events-none opacity-90"></div>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 animate-glass-sweep opacity-70"></div>
+              <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 ${lowPower ? '' : 'animate-glass-sweep'} opacity-70`}></div>
               {activeNotes[note.label] && (
-                <div className="absolute inset-0 w-full h-full bg-white opacity-40 animate-pulse rounded-full"></div>
+                <div className={`absolute inset-0 w-full h-full bg-white opacity-40 ${lowPower ? '' : 'animate-pulse'} rounded-full`}></div>
               )}
               <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] md:text-[12px] font-black tracking-[0.7em] uppercase transition-all duration-700 ${activeNotes[note.label] ? 'opacity-100 scale-110 text-emerald-900' : 'opacity-30 text-emerald-800'}`}>
                 {note.label}
@@ -317,6 +324,12 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract }) => {
         }
         .animate-glass-sweep {
           animation: glass-sweep 18s infinite linear;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .animate-ethereal-glow,
+          .animate-glass-sweep {
+            animation: none;
+          }
         }
         .custom-range {
           -webkit-appearance: none;

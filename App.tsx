@@ -13,22 +13,48 @@ const App: React.FC = () => {
   const [volume, setVolume] = useState(50);
   const [currentScale, setCurrentScale] = useState<ScaleType>('Chakra C');
   const [lastActivity, setLastActivity] = useState<number>(Date.now());
+  const [lowPower, setLowPower] = useState(false);
 
   const handleActivity = () => setLastActivity(Date.now());
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return;
+    const mediaQueries = [
+      window.matchMedia('(prefers-reduced-motion: reduce)'),
+      window.matchMedia('(pointer: coarse)'),
+      window.matchMedia('(max-width: 768px)')
+    ];
+    const updateLowPower = () => {
+      setLowPower(mediaQueries.some(mq => mq.matches));
+    };
+    updateLowPower();
+    mediaQueries.forEach(mq => {
+      if (mq.addEventListener) mq.addEventListener('change', updateLowPower);
+      else mq.addListener(updateLowPower);
+    });
+    return () => {
+      mediaQueries.forEach(mq => {
+        if (mq.removeEventListener) mq.removeEventListener('change', updateLowPower);
+        else mq.removeListener(updateLowPower);
+      });
+    };
+  }, []);
 
   useEffect(() => {
     audioService.setVolume(isMuted ? 0 : volume);
   }, [volume, isMuted]);
 
+  const pulseClass = lowPower ? '' : 'animate-pulse';
+
   return (
     <div className="relative min-h-screen w-full flex flex-col bg-white overflow-hidden select-none transition-colors duration-1000">
       {/* Dynamic Ethereal Forest Background Visualization */}
-      <BackgroundDynamics activityIntensity={lastActivity} />
+      <BackgroundDynamics activityIntensity={lastActivity} lowPower={lowPower} />
 
       {/* Decorative Forest/Crystal Light Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-100/30 rounded-full blur-glow animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-teal-100/20 rounded-full blur-glow animate-pulse delay-700"></div>
-      <div className="absolute top-[20%] right-[-5%] w-[30%] h-[40%] bg-blue-100/10 rounded-full blur-glow animate-pulse delay-1000"></div>
+      <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-100/30 rounded-full blur-glow ${pulseClass}`}></div>
+      <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-teal-100/20 rounded-full blur-glow ${lowPower ? '' : 'animate-pulse delay-700'}`}></div>
+      <div className={`absolute top-[20%] right-[-5%] w-[30%] h-[40%] bg-blue-100/10 rounded-full blur-glow ${lowPower ? '' : 'animate-pulse delay-1000'}`}></div>
       
       <Header 
         activeTab={activeTab} 
@@ -55,6 +81,7 @@ const App: React.FC = () => {
             <CrystalHarp 
               notes={SCALES[currentScale]} 
               onInteract={handleActivity}
+              lowPower={lowPower}
             />
           </div>
         ) : (

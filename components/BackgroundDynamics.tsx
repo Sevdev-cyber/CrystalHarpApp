@@ -3,54 +3,59 @@ import React, { useEffect, useState, useRef } from 'react';
 
 interface BackgroundDynamicsProps {
   activityIntensity: number;
+  lowPower?: boolean;
 }
 
-const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensity }) => {
+const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensity, lowPower = false }) => {
   const [blobs, setBlobs] = useState<{ id: number; x: number; y: number; size: number; color: string; duration: number; delay: number }[]>([]);
 
   useEffect(() => {
     // Initial generation of subtle moving light blobs
-    const newBlobs = Array.from({ length: 8 }).map((_, i) => ({
+    const blobCount = lowPower ? 3 : 8;
+    const newBlobs = Array.from({ length: blobCount }).map((_, i) => ({
       id: i,
       x: Math.random() * 100,
       y: Math.random() * 100,
-      size: 300 + Math.random() * 400,
+      size: (lowPower ? 180 : 300) + Math.random() * (lowPower ? 220 : 400),
       color: [
         'rgba(199, 210, 254, 0.1)', // indigo
         'rgba(251, 207, 232, 0.1)', // pink
         'rgba(186, 230, 253, 0.1)', // blue
         'rgba(187, 247, 208, 0.1)', // green
       ][Math.floor(Math.random() * 4)],
-      duration: 15 + Math.random() * 20,
+      duration: (lowPower ? 22 : 15) + Math.random() * (lowPower ? 18 : 20),
       delay: Math.random() * -20,
     }));
     setBlobs(newBlobs);
-  }, []);
+  }, [lowPower]);
 
   // Effect intensity factor based on last activity
   const [activeIntensity, setActiveIntensity] = useState(1);
   useEffect(() => {
+    if (lowPower) return;
     setActiveIntensity(1.5);
     const timeout = setTimeout(() => setActiveIntensity(1), 2000);
     return () => clearTimeout(timeout);
-  }, [activityIntensity]);
+  }, [activityIntensity, lowPower]);
+
+  const blurClass = lowPower ? 'blur-[60px]' : 'blur-[100px]';
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
       {blobs.map(blob => (
         <div
           key={blob.id}
-          className="absolute rounded-full blur-[100px] transition-transform duration-1000 ease-out"
+          className={`absolute rounded-full ${blurClass} transition-transform duration-1000 ease-out`}
           style={{
             left: `${blob.x}%`,
             top: `${blob.y}%`,
             width: `${blob.size}px`,
             height: `${blob.size}px`,
             backgroundColor: blob.color,
-            animation: `float-blob ${blob.duration}s infinite linear`,
+            animation: lowPower ? 'none' : `float-blob ${blob.duration}s infinite linear`,
             animationDelay: `${blob.delay}s`,
-            transform: `scale(${activeIntensity})`,
-            opacity: 0.15 + (activeIntensity - 1) * 0.1
+            transform: lowPower ? 'scale(1)' : `scale(${activeIntensity})`,
+            opacity: lowPower ? 0.12 : 0.15 + (activeIntensity - 1) * 0.1
           }}
         />
       ))}
