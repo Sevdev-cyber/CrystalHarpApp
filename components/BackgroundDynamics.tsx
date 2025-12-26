@@ -40,7 +40,7 @@ const BackgroundDynamics: React.FC<BackgroundDynamicsProps> = ({ activityIntensi
     return () => clearTimeout(timeout);
   }, [activityIntensity, lowPower, motionEnabled]);
 
-  const blurClass = lowPower ? 'blur-[60px]' : 'blur-[100px]';
+  const blurClass = lowPower ? 'blur-[40px]' : 'blur-[100px]';
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">

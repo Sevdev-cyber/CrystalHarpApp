@@ -33,6 +33,28 @@
       filter: blur(120px);
       opacity: 0.15;
     }
+    html.embedded,
+    body.embedded {
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+    body.embedded {
+      min-height: 100%;
+    }
+    body.embedded #root {
+      height: 100%;
+    }
+    body.embedded main {
+      -webkit-overflow-scrolling: touch;
+    }
+    body.reduced-effects .blur-glow {
+      filter: blur(80px);
+      opacity: 0.1;
+    }
+    body.reduced-effects .text-iridescent {
+      animation: none;
+    }
     
     /* Loading Animation */
     #loading-screen {

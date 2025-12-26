@@ -7,6 +7,7 @@ interface HeaderProps {
   onVolumeChange: (vol: number) => void;
   audioReady: boolean;
   onEnableAudio: () => void;
+  reducedEffects?: boolean;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -15,16 +16,15 @@ const Header: React.FC<HeaderProps> = ({
   volume,
   onVolumeChange,
   audioReady,
-  onEnableAudio
+  onEnableAudio,
+  reducedEffects = false
 }) => {
+  const blurClass = reducedEffects ? 'backdrop-blur-md' : 'backdrop-blur-xl';
+  const paddingClass = reducedEffects ? 'py-3' : 'py-4';
+
   return (
-    <header className="w-full px-6 py-4 flex justify-between items-center z-30 backdrop-blur-xl bg-white/60 border-b border-slate-100 shadow-sm sticky top-0">
-      <div className="flex items-center gap-3 min-w-fit">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-indigo-100 via-rose-50 to-teal-50 flex items-center justify-center shadow-inner border border-white/50">
-          <svg className="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-          </svg>
-        </div>
+    <header className={`w-full px-6 ${paddingClass} flex justify-between items-center z-30 ${blurClass} bg-white/60 border-b border-slate-100 shadow-sm sticky top-0`}>
+      <div className="flex items-center min-w-fit">
         <span className="text-xs md:text-sm font-bold tracking-[0.35em] text-slate-800 uppercase italic">Sacred Forest</span>
       </div>
 

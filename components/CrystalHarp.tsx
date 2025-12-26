@@ -18,9 +18,10 @@ interface CrystalHarpProps {
   onInteract: () => void;
   lowPower?: boolean;
   motionEnabled?: boolean;
+  compact?: boolean;
 }
 
-const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower = false, motionEnabled = true }) => {
+const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower = false, motionEnabled = true, compact = false }) => {
   const [activeNotes, setActiveNotes] = useState<Record<string, boolean>>({});
   const [particles, setParticles] = useState<Particle[]>([]);
   const [waveAmplitude, setWaveAmplitude] = useState(0);
@@ -28,8 +29,27 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
   const [sustain, setSustain] = useState(10.0); 
   const requestRef = useRef<number | null>(null);
   const [time, setTime] = useState(0);
-  const waveSegments = lowPower ? 40 : 80;
+  const waveSegments = lowPower ? 30 : 80;
+  const compactLayout = compact;
+  const perfMode = lowPower || compactLayout;
   const canAnimate = motionEnabled && !lowPower;
+  const containerPadding = compactLayout ? 'px-3 pb-6' : 'px-6 pb-20';
+  const sectionSpacing = compactLayout ? 'mb-4' : 'mb-10';
+  const harpHeight = compactLayout ? 'h-[320px]' : 'h-[540px]';
+  const controlPanelPadding = compactLayout ? 'px-5 py-4' : 'px-10 py-8';
+  const controlPanelGap = compactLayout ? 'gap-5' : 'gap-8';
+  const controlPanelRadius = compactLayout ? 'rounded-[2.5rem]' : 'rounded-[3rem]';
+  const controlPanelBlur = perfMode ? 'backdrop-blur-2xl' : 'backdrop-blur-[40px]';
+  const controlPanelShadow = perfMode ? 'shadow-lg' : 'shadow-xl';
+  const primaryButtonPadding = compactLayout ? 'px-5 py-2.5' : 'px-8 py-4';
+  const footerButtonPadding = compactLayout ? 'px-7 py-3' : 'px-10 py-5';
+  const footerTextSize = compactLayout ? 'text-[9px]' : 'text-[11px]';
+  const footerGap = compactLayout ? 'gap-3' : 'gap-6';
+  const silenceButtonPadding = compactLayout ? 'px-5 py-2.5' : 'px-8 py-4';
+  const silenceTextSize = compactLayout ? 'text-[9px]' : 'text-[10px]';
+  const noteLabelSize = compactLayout ? 'text-[8px]' : 'text-[10px] md:text-[12px]';
+  const noteLabelTracking = compactLayout ? 'tracking-[0.5em]' : 'tracking-[0.7em]';
+  const noteLabelRight = compactLayout ? 'right-6' : 'right-10';
 
   useEffect(() => {
     if (!motionEnabled) {
@@ -59,7 +79,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
   const spawnParticles = (idx: number, color: string) => {
     const newParticles: Particle[] = [];
     // Creating "Light Blooms" rather than sharp particles
-    const count = lowPower ? 1 : 3; 
+    const count = perfMode ? 1 : 3; 
     const yPos = 85 - (idx * (75 / Math.max(1, notes.length - 1 || 1))); 
 
     for (let i = 0; i < count; i++) {
@@ -69,15 +89,15 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
         y: yPos,
         color,
         angle: (Math.random() * (Math.PI / 2)) - (Math.PI / 4) - (Math.PI / 2), // Drift slowly upwards
-        speed: 0.08 + Math.random() * (lowPower ? 0.15 : 0.3), // Ultra slow movement
-        size: (lowPower ? 160 : 250) + Math.random() * (lowPower ? 200 : 300), // Massive soft blooms
+        speed: 0.08 + Math.random() * (perfMode ? 0.12 : 0.3), // Ultra slow movement
+        size: (perfMode ? 120 : 250) + Math.random() * (perfMode ? 160 : 300), // Massive soft blooms
       });
     }
     setParticles(prev => [...prev, ...newParticles]);
     
     setTimeout(() => {
       setParticles(prev => prev.filter(p => !newParticles.find(np => np.id === p.id)));
-    }, lowPower ? 5000 : 8000); // Longer lifespan for softer transition
+    }, perfMode ? 4500 : 8000); // Longer lifespan for softer transition
   };
 
   const handleInteraction = useCallback((freq: number, label: string, idx: number, color: string, duration?: number) => {
@@ -130,7 +150,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
   };
 
   return (
-    <div className="relative flex flex-col items-center w-full max-w-6xl mx-auto select-none px-6 pb-20">
+    <div className={`relative flex flex-col items-center w-full max-w-6xl mx-auto select-none ${containerPadding}`}>
       
       {/* Background Sound Layer */}
       <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center opacity-40">
@@ -157,7 +177,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
         {particles.map((p) => (
           <div
             key={p.id}
-            className={`absolute rounded-full ${lowPower || !motionEnabled ? 'blur-[60px] opacity-20' : 'blur-[100px] animate-ethereal-glow opacity-0'}`}
+            className={`absolute rounded-full ${perfMode || !motionEnabled ? 'blur-[40px] opacity-20' : 'blur-[100px] animate-ethereal-glow opacity-0'}`}
             style={{
               left: `${p.x}%`,
               bottom: `${p.y}%`,
@@ -173,18 +193,18 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
       </div>
 
       {/* Main Harp Section */}
-      <div className="relative w-full h-[540px] flex flex-col-reverse items-center justify-between py-6 z-10 mb-10">
+      <div className={`relative w-full ${harpHeight} flex flex-col-reverse items-center justify-between py-6 z-10 ${sectionSpacing}`}>
         {notes.map((note, idx) => (
           <div 
             key={note.label}
-            className="group relative flex items-center justify-center w-full cursor-pointer h-14"
+            className={`group relative flex items-center justify-center w-full cursor-pointer ${compactLayout ? 'h-10' : 'h-14'}`}
             onClick={() => handleInteraction(note.freq, note.label, idx, note.color)}
           >
-            <div className={`absolute h-12 rounded-full blur-[50px] transition-all duration-1000 ${activeNotes[note.label] ? 'opacity-80 scale-150' : 'opacity-10'}`} 
+            <div className={`absolute ${compactLayout ? 'h-8' : 'h-12'} rounded-full ${perfMode ? 'blur-[24px]' : 'blur-[50px]'} transition-all duration-1000 ${activeNotes[note.label] ? 'opacity-80 scale-150' : 'opacity-10'}`} 
                  style={{ width: `${note.width}%`, backgroundColor: note.color }}></div>
 
             <div 
-              className={`relative h-9 md:h-11 rounded-full border-[2.5px] transition-all duration-700 transform group-hover:scale-y-110 shadow-xl overflow-hidden backdrop-blur-2xl`}
+              className={`relative ${compactLayout ? 'h-8' : 'h-9 md:h-11'} rounded-full border-[2.5px] transition-all duration-700 transform group-hover:scale-y-110 ${perfMode ? 'shadow-lg backdrop-blur-lg' : 'shadow-xl backdrop-blur-2xl'} overflow-hidden`}
               style={{ 
                 width: `${note.width}%`,
                 borderColor: activeNotes[note.label] ? '#fff' : `${note.color}88`,
@@ -201,7 +221,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
               {activeNotes[note.label] && (
                 <div className={`absolute inset-0 w-full h-full bg-white opacity-40 ${canAnimate ? 'animate-pulse' : ''} rounded-full`}></div>
               )}
-              <span className={`absolute right-10 top-1/2 -translate-y-1/2 text-[10px] md:text-[12px] font-black tracking-[0.7em] uppercase transition-all duration-700 ${activeNotes[note.label] ? 'opacity-100 scale-110 text-emerald-900' : 'opacity-30 text-emerald-800'}`}>
+              <span className={`absolute ${noteLabelRight} top-1/2 -translate-y-1/2 ${noteLabelSize} font-black ${noteLabelTracking} uppercase transition-all duration-700 ${activeNotes[note.label] ? 'opacity-100 scale-110 text-emerald-900' : 'opacity-30 text-emerald-800'}`}>
                 {note.label}
               </span>
             </div>
@@ -210,27 +230,27 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
       </div>
 
       {/* Primary Performance Buttons */}
-      <div className="w-full flex flex-wrap justify-center gap-4 mb-10 z-20">
+      <div className={`w-full flex flex-wrap justify-center gap-4 z-20 ${sectionSpacing}`}>
         <button 
-          className="group px-8 py-4 rounded-full bg-emerald-600 text-white shadow-lg hover:shadow-emerald-200/50 hover:bg-emerald-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95"
+          className={`group ${primaryButtonPadding} rounded-full bg-emerald-600 text-white shadow-lg hover:shadow-emerald-200/50 hover:bg-emerald-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95`}
           onClick={() => playChord([0, 2, 4, 7])}
         >
           Sacred Root
         </button>
         <button 
-          className="group px-8 py-4 rounded-full bg-teal-600 text-white shadow-lg hover:shadow-teal-200/50 hover:bg-teal-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95"
+          className={`group ${primaryButtonPadding} rounded-full bg-teal-600 text-white shadow-lg hover:shadow-teal-200/50 hover:bg-teal-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95`}
           onClick={() => playChord([2, 4, 6, 7])}
         >
           Spirit Heart
         </button>
         <button 
-          className="group px-8 py-4 rounded-full bg-blue-600 text-white shadow-lg hover:shadow-blue-200/50 hover:bg-blue-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3"
+          className={`group ${primaryButtonPadding} rounded-full bg-blue-600 text-white shadow-lg hover:shadow-blue-200/50 hover:bg-blue-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3`}
           onClick={() => playGlissando('up')}
         >
           Ascend
         </button>
         <button 
-          className="group px-8 py-4 rounded-full bg-indigo-600 text-white shadow-lg hover:shadow-indigo-200/50 hover:bg-indigo-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3"
+          className={`group ${primaryButtonPadding} rounded-full bg-indigo-600 text-white shadow-lg hover:shadow-indigo-200/50 hover:bg-indigo-700 transition-all font-black tracking-[0.3em] text-[10px] uppercase active:scale-95 flex items-center gap-3`}
           onClick={() => playGlissando('down')}
         >
           Descend
@@ -238,9 +258,9 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
       </div>
 
       {/* Footer Controls */}
-      <div className="w-full flex justify-center gap-6 z-20 mb-10">
+      <div className={`w-full flex justify-center z-20 ${footerGap} ${sectionSpacing}`}>
         <button 
-          className="px-10 py-5 rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black tracking-[0.4em] text-[11px] uppercase transition-all shadow-xl shadow-emerald-200/50 hover:scale-[1.03] active:scale-95"
+          className={`${footerButtonPadding} rounded-full bg-gradient-to-br from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black tracking-[0.4em] ${footerTextSize} uppercase transition-all shadow-xl shadow-emerald-200/50 hover:scale-[1.03] active:scale-95`}
           onClick={() => {
             notes.forEach((n, i) => {
               setTimeout(() => handleInteraction(n.freq, n.label, i, n.color, sustain + 8.0), i * 350);
@@ -250,7 +270,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
           Forest Cascade
         </button>
         <button 
-          className="group px-8 py-4 text-emerald-900/40 hover:text-rose-600 font-black tracking-[0.4em] text-[10px] uppercase transition-all flex items-center gap-3 bg-white/40 backdrop-blur-xl rounded-full border border-white/60"
+          className={`group ${silenceButtonPadding} text-emerald-900/40 hover:text-rose-600 font-black tracking-[0.4em] ${silenceTextSize} uppercase transition-all flex items-center gap-3 bg-white/40 ${perfMode ? 'backdrop-blur-lg' : 'backdrop-blur-xl'} rounded-full border border-white/60`}
           onClick={stopAll}
         >
           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="3" /></svg>
@@ -260,7 +280,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
 
       {/* Control Panel (Sliders) */}
       <div className="w-full max-w-5xl z-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 px-10 py-8 bg-white/40 backdrop-blur-[40px] border border-white/80 rounded-[3rem] shadow-xl">
+        <div className={`grid grid-cols-1 md:grid-cols-2 ${controlPanelGap} ${controlPanelPadding} bg-white/40 ${controlPanelBlur} border border-white/80 ${controlPanelRadius} ${controlPanelShadow}`}>
           
           {/* Glissando Speed */}
           <div className="flex flex-col gap-3">

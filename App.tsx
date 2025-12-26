@@ -16,6 +16,7 @@ const App: React.FC = () => {
   const [audioReady, setAudioReady] = useState(() => audioService.isRunning());
   const [isVisible, setIsVisible] = useState(true);
   const [isIdle, setIsIdle] = useState(false);
+  const [isEmbedded, setIsEmbedded] = useState(false);
 
   const handleActivity = () => {
     setLastActivity(Date.now());
@@ -51,6 +52,17 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let embedded = false;
+    try {
+      embedded = window.self !== window.top;
+    } catch {
+      embedded = true;
+    }
+    setIsEmbedded(embedded);
+  }, []);
+
+  useEffect(() => {
     if (typeof document === 'undefined') return;
     const updateVisibility = () => setIsVisible(!document.hidden);
     updateVisibility();
@@ -59,24 +71,37 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!lowPower) {
+    const autoPause = lowPower || isEmbedded;
+    if (!autoPause) {
       setIsIdle(false);
       return;
     }
     setIsIdle(false);
-    const timeout = setTimeout(() => setIsIdle(true), 5000);
+    const idleDelay = lowPower ? 4500 : 9000;
+    const timeout = setTimeout(() => setIsIdle(true), idleDelay);
     return () => clearTimeout(timeout);
-  }, [lastActivity, lowPower]);
+  }, [lastActivity, lowPower, isEmbedded]);
 
   useEffect(() => {
     audioService.setVolume(isMuted ? 0 : volume);
   }, [volume, isMuted]);
 
-  const pulseClass = lowPower ? '' : 'animate-pulse';
-  const motionEnabled = isVisible && (!lowPower || !isIdle);
+  const embeddedScrollLock = isEmbedded;
+  const compactLayout = isEmbedded && lowPower;
+  const reducedEffects = lowPower;
+  const autoPause = lowPower || isEmbedded;
+  const pulseClass = reducedEffects ? '' : 'animate-pulse';
+  const motionEnabled = isVisible && (!autoPause || !isIdle);
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    document.body.classList.toggle('embedded', embeddedScrollLock);
+    document.documentElement.classList.toggle('embedded', embeddedScrollLock);
+    document.body.classList.toggle('reduced-effects', reducedEffects);
+  }, [embeddedScrollLock, reducedEffects]);
 
   return (
-    <div className="relative min-h-screen w-full flex flex-col bg-white overflow-hidden select-none transition-colors duration-1000">
+    <div className={`relative w-full flex flex-col bg-white overflow-hidden select-none transition-colors duration-1000 ${embeddedScrollLock ? 'h-[100svh]' : 'min-h-screen'}`}>
       {/* Dynamic Ethereal Forest Background Visualization */}
       <BackgroundDynamics activityIntensity={lastActivity} lowPower={lowPower} motionEnabled={motionEnabled} />
 
@@ -92,6 +117,7 @@ const App: React.FC = () => {
         onVolumeChange={setVolume}
         audioReady={audioReady}
         onEnableAudio={handleEnableAudio}
+        reducedEffects={reducedEffects}
       />
 
       {!audioReady && (
@@ -108,21 +134,22 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4 z-10">
+      <main className={`flex-1 flex flex-col items-center min-h-0 z-10 ${compactLayout ? 'justify-start pt-2 pb-4 px-3' : 'justify-center p-4'} ${embeddedScrollLock ? 'overflow-y-auto overscroll-contain' : ''}`}>
         <div className="w-full max-w-5xl transition-all duration-1000 ease-in-out opacity-100 transform translate-y-0">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl md:text-6xl font-bold mb-3 text-iridescent italic px-4">
+          <div className={`text-center ${compactLayout ? 'mb-4' : 'mb-8'}`}>
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-3 text-iridescent italic px-4">
               Sacred Forest Crystal Harp
             </h2>
-            <p className="text-emerald-800/50 text-[10px] md:text-xs tracking-[0.5em] uppercase font-bold">
+            <p className={`text-emerald-800/50 text-[10px] md:text-xs tracking-[0.5em] uppercase font-bold ${compactLayout ? 'leading-4' : ''}`}>
               {SCALE_INFO[currentScale].subtitle} • 432 Hz
             </p>
           </div>
 
-          <div className="mb-10">
+          <div className={compactLayout ? 'mb-6' : 'mb-10'}>
             <ScaleWheel
               currentScale={currentScale}
               onSelect={setCurrentScale}
+              compact={compactLayout}
             />
           </div>
 
@@ -131,11 +158,12 @@ const App: React.FC = () => {
             onInteract={handleActivity}
             lowPower={lowPower}
             motionEnabled={motionEnabled}
+            compact={compactLayout}
           />
         </div>
       </main>
 
-      <footer className="absolute bottom-6 left-0 right-0 text-center text-emerald-900/20 text-[9px] uppercase tracking-[0.6em] pointer-events-none font-bold">
+      <footer className={`absolute bottom-6 left-0 right-0 text-center text-emerald-900/20 text-[9px] uppercase tracking-[0.6em] pointer-events-none font-bold ${compactLayout ? 'hidden' : ''}`}>
         Sacred Forest Ancient Resonance
       </footer>
     </div>
