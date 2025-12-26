@@ -168,7 +168,7 @@ export class AudioService {
     return true;
   }
 
-  public playCrystalNote(frequency: number, duration: number = 8.0, label?: string) {
+  public playCrystalNote(frequency: number, duration: number = 18.0, label?: string) {
     if (!this.ctx || !this.reverbNode) {
       this.initContext();
     }
@@ -210,7 +210,7 @@ export class AudioService {
     gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + 0.7);
     // Long sustain decay
     gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 2.5);
-    // Deep fade out (8 seconds total)
+    // Deep fade out (duration seconds total)
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
 
     if (this.dryGain) gain.connect(this.dryGain);

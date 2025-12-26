@@ -25,7 +25,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
   const [particles, setParticles] = useState<Particle[]>([]);
   const [waveAmplitude, setWaveAmplitude] = useState(0);
   const [glissandoSpeed, setGlissandoSpeed] = useState(300); 
-  const [sustain, setSustain] = useState(10.0); 
+  const [sustain, setSustain] = useState(18.0); 
   const requestRef = useRef<number | null>(null);
   const [time, setTime] = useState(0);
   const waveSegments = lowPower ? 30 : 80;
