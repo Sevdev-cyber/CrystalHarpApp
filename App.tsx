@@ -14,8 +14,17 @@ const App: React.FC = () => {
   const [currentScale, setCurrentScale] = useState<ScaleType>('Chakra C');
   const [lastActivity, setLastActivity] = useState<number>(Date.now());
   const [lowPower, setLowPower] = useState(false);
+  const [audioReady, setAudioReady] = useState(() => audioService.isRunning());
 
-  const handleActivity = () => setLastActivity(Date.now());
+  const handleActivity = () => {
+    setLastActivity(Date.now());
+    setAudioReady(prev => (prev ? prev : audioService.isRunning()));
+  };
+
+  const handleEnableAudio = async () => {
+    const ready = await audioService.unlockAudio();
+    setAudioReady(ready);
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
@@ -65,6 +74,8 @@ const App: React.FC = () => {
         onMuteToggle={() => setIsMuted(!isMuted)}
         volume={volume}
         onVolumeChange={setVolume}
+        audioReady={audioReady}
+        onEnableAudio={handleEnableAudio}
       />
 
       <main className="flex-1 flex flex-col items-center justify-center p-4 z-10">

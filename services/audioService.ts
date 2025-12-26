@@ -112,6 +112,29 @@ export class AudioService {
       this.masterGain.gain.setTargetAtTime(val / 100, this.ctx?.currentTime || 0, 0.1);
     }
   }
+
+  public isRunning() {
+    return this.ctx?.state === 'running';
+  }
+
+  public async unlockAudio() {
+    this.initContext();
+    if (!this.ctx) return false;
+    if (this.ctx.state === 'suspended') {
+      await this.ctx.resume();
+    }
+    try {
+      // Tiny inaudible tick helps iOS finalize audio unlock.
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(this.masterGain ?? this.ctx.destination);
+      osc.start();
+      osc.stop(this.ctx.currentTime + 0.05);
+    } catch (e) {}
+    return this.ctx.state === 'running';
+  }
 }
 
 export const audioService = new AudioService();

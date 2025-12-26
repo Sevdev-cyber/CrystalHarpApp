@@ -11,6 +11,8 @@ interface HeaderProps {
   onMuteToggle: () => void;
   volume: number;
   onVolumeChange: (vol: number) => void;
+  audioReady: boolean;
+  onEnableAudio: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ 
@@ -21,7 +23,9 @@ const Header: React.FC<HeaderProps> = ({
   isMuted,
   onMuteToggle,
   volume,
-  onVolumeChange
+  onVolumeChange,
+  audioReady,
+  onEnableAudio
 }) => {
   const scaleList = Object.keys(SCALES) as ScaleType[];
 
@@ -82,6 +86,16 @@ const Header: React.FC<HeaderProps> = ({
             ))}
           </div>
         </div>
+
+        {!audioReady && (
+          <button
+            type="button"
+            onClick={onEnableAudio}
+            className="px-3 py-2 rounded-full bg-emerald-600 text-white text-[9px] md:text-[10px] font-black tracking-[0.25em] uppercase shadow-md hover:bg-emerald-700 transition-all"
+          >
+            Enable Sound
+          </button>
+        )}
 
         {/* Scale Selector */}
         <div className="relative group">
