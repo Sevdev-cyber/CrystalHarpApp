@@ -6,7 +6,7 @@ A luxurious, high-end sound healing sanctuary. Experience the ancient resonance 
 ## ✨ Features
 
 - **Crystal Resonance Engine:** High-fidelity synthesis of crystal singing bowl harmonics.
-- **Dynamic Scales:** Choose from Chakra, Celtic Moon, Celestial Sun, and other ancient tuning systems.
+- **Dynamic Scales:** Choose from Chakra, Celtic Moon, Sun D, Mystic E, and other ancient tuning systems.
 - **Ethereal Visuals:** Reactive forest mist and light blooms that respond to your touch.
 - **Inner Grace Meditation:** A Gemini-powered mindful companion that provides divine affirmations based on your current state of being.
 - **Pro-Audio Controls:** Adjust glissando speed and resonance sustain for a personalized healing journey.
