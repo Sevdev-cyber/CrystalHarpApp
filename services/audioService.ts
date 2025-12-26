@@ -4,6 +4,15 @@ export class AudioService {
   private masterGain: GainNode | null = null;
   private reverbNode: ConvolverNode | null = null;
   private activeOscillators: Set<{ oscs: OscillatorNode[], gain: GainNode }> = new Set();
+  private activeBuffers: Set<{ source: AudioBufferSourceNode, gain: GainNode }> = new Set();
+  private samplesPromise: Promise<void> | null = null;
+  private sampleBuffers: Map<string, AudioBuffer> = new Map();
+  private sampleMeta = [
+    { note: 'D5', file: 'D5.mp3' },
+    { note: 'D#5', file: 'D-sharp5.mp3' },
+    { note: 'A#5', file: 'A-sharp5.mp3' },
+    { note: 'C6', file: 'C6.mp3' },
+  ];
 
   constructor() {
     this.initContext();
@@ -16,6 +25,7 @@ export class AudioService {
       this.masterGain.gain.value = 0.5;
       this.masterGain.connect(this.ctx.destination);
       this.setupReverb();
+      this.loadSamples();
     }
   }
 
@@ -37,12 +47,129 @@ export class AudioService {
     this.reverbNode.connect(this.masterGain);
   }
 
-  public playCrystalNote(frequency: number, duration: number = 8.0) {
+  private normalizeNoteLabel(label: string) {
+    const match = label.match(/^([A-Ga-g])([#b]?)(\d)$/);
+    if (!match) return label;
+    const letter = match[1].toUpperCase();
+    const accidental = match[2];
+    const octave = match[3];
+    const alias: Record<string, string> = {
+      'Db': 'C#',
+      'Eb': 'D#',
+      'Gb': 'F#',
+      'Ab': 'G#',
+      'Bb': 'A#',
+    };
+    const note = `${letter}${accidental || ''}`;
+    const normalized = alias[note] || note;
+    return `${normalized}${octave}`;
+  }
+
+  private noteToMidi(label: string) {
+    const match = label.match(/^([A-Ga-g])([#b]?)(\d)$/);
+    if (!match) return null;
+    const letter = match[1].toUpperCase();
+    const accidental = match[2];
+    const octave = parseInt(match[3], 10);
+    const base: Record<string, number> = {
+      C: 0,
+      D: 2,
+      E: 4,
+      F: 5,
+      G: 7,
+      A: 9,
+      B: 11
+    };
+    let semitone = base[letter];
+    if (accidental === '#') semitone += 1;
+    if (accidental === 'b') semitone -= 1;
+    return (octave + 1) * 12 + semitone;
+  }
+
+  private midiToFreq(midi: number) {
+    return 440 * Math.pow(2, (midi - 69) / 12);
+  }
+
+  private freqToMidi(freq: number) {
+    return 69 + 12 * Math.log2(freq / 440);
+  }
+
+  private async loadSamples() {
+    if (!this.ctx || this.samplesPromise) return this.samplesPromise;
+    const baseUrl = (import.meta as any).env?.BASE_URL || '/';
+    this.samplesPromise = (async () => {
+      for (const meta of this.sampleMeta) {
+        if (this.sampleBuffers.has(meta.note)) continue;
+        try {
+          const url = `${baseUrl}samples/${meta.file}`;
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const arrayBuffer = await res.arrayBuffer();
+          const audioBuffer = await this.ctx!.decodeAudioData(arrayBuffer);
+          this.sampleBuffers.set(meta.note, audioBuffer);
+        } catch (e) {}
+      }
+    })();
+    return this.samplesPromise;
+  }
+
+  private tryPlaySample(frequency: number, duration: number, label?: string) {
+    if (!this.ctx || !this.reverbNode) return false;
+    const normalizedLabel = label ? this.normalizeNoteLabel(label) : null;
+    const targetMidi = normalizedLabel ? this.noteToMidi(normalizedLabel) : this.freqToMidi(frequency);
+    let best: { note: string; distance: number; freq: number } | null = null;
+
+    for (const meta of this.sampleMeta) {
+      const buffer = this.sampleBuffers.get(meta.note);
+      if (!buffer) continue;
+      const midi = this.noteToMidi(meta.note);
+      if (midi === null || targetMidi === null) continue;
+      const distance = Math.abs(targetMidi - midi);
+      if (!best || distance < best.distance) {
+        best = { note: meta.note, distance, freq: this.midiToFreq(midi) };
+      }
+    }
+
+    if (!best) return false;
+    const buffer = this.sampleBuffers.get(best.note);
+    if (!buffer) return false;
+
+    const ratio = frequency / best.freq;
+    const source = this.ctx.createBufferSource();
+    const gain = this.ctx.createGain();
+    source.buffer = buffer;
+    source.playbackRate.setValueAtTime(ratio, this.ctx.currentTime);
+
+    const now = this.ctx.currentTime;
+    const totalDuration = Math.min(duration, buffer.duration / ratio);
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.9, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + totalDuration);
+
+    source.connect(gain);
+    gain.connect(this.reverbNode);
+    source.start();
+    source.stop(now + totalDuration + 0.05);
+
+    const nodeRef = { source, gain };
+    this.activeBuffers.add(nodeRef);
+    source.onended = () => {
+      this.activeBuffers.delete(nodeRef);
+    };
+    return true;
+  }
+
+  public playCrystalNote(frequency: number, duration: number = 8.0, label?: string) {
     if (!this.ctx || !this.reverbNode) {
       this.initContext();
     }
     if (this.ctx?.state === 'suspended') {
       this.ctx.resume();
+    }
+    this.loadSamples();
+
+    if (this.tryPlaySample(frequency, duration, label)) {
+      return;
     }
 
     const ctx = this.ctx!;
@@ -105,6 +232,13 @@ export class AudioService {
       }, 900);
     });
     this.activeOscillators.clear();
+
+    this.activeBuffers.forEach(node => {
+      node.gain.gain.cancelScheduledValues(now);
+      node.gain.gain.linearRampToValueAtTime(0, now + 0.4);
+      try { node.source.stop(now + 0.45); } catch(e) {}
+    });
+    this.activeBuffers.clear();
   }
 
   public setVolume(val: number) {
@@ -123,6 +257,7 @@ export class AudioService {
     if (this.ctx.state === 'suspended') {
       await this.ctx.resume();
     }
+    await this.loadSamples();
     try {
       // Tiny inaudible tick helps iOS finalize audio unlock.
       const osc = this.ctx.createOscillator();

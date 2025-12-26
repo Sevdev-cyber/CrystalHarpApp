@@ -82,7 +82,7 @@ const CrystalHarp: React.FC<CrystalHarpProps> = ({ notes, onInteract, lowPower =
 
   const handleInteraction = useCallback((freq: number, label: string, idx: number, color: string, duration?: number) => {
     const finalDuration = duration ?? sustain;
-    audioService.playCrystalNote(freq, finalDuration);
+    audioService.playCrystalNote(freq, finalDuration, label);
     onInteract();
     setActiveNotes(prev => ({ ...prev, [label]: true }));
     spawnParticles(idx, color);
