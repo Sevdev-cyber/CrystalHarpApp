@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Sacred Forest Crystal Harp 2",
+  "description": "A high-end sound healing sanctuary featuring crystal singing bowl resonance and forest meditation.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
