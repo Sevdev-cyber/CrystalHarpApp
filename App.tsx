@@ -87,7 +87,9 @@ const App: React.FC = () => {
   }, [volume, isMuted]);
 
   const embeddedScrollLock = isEmbedded;
-  const reducedEffects = lowPower;
+  const useMobileEffects = true;
+  const visualLowPower = lowPower || useMobileEffects;
+  const reducedEffects = visualLowPower;
   const autoPause = lowPower || isEmbedded;
   const pulseClass = reducedEffects ? '' : 'animate-pulse';
   const motionEnabled = isVisible && (!autoPause || !isIdle);
@@ -102,7 +104,7 @@ const App: React.FC = () => {
   return (
     <div className={`relative w-full flex flex-col bg-white overflow-hidden select-none transition-colors duration-1000 ${embeddedScrollLock ? 'h-[100svh]' : 'min-h-screen'}`}>
       {/* Dynamic Ethereal Forest Background Visualization */}
-      <BackgroundDynamics activityIntensity={lastActivity} lowPower={lowPower} motionEnabled={motionEnabled} />
+      <BackgroundDynamics activityIntensity={lastActivity} lowPower={visualLowPower} motionEnabled={motionEnabled} />
 
       {/* Decorative Forest/Crystal Light Elements */}
       <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-100/30 rounded-full blur-glow ${pulseClass}`}></div>
@@ -154,7 +156,7 @@ const App: React.FC = () => {
           <CrystalHarp 
             notes={SCALES[currentScale]} 
             onInteract={handleActivity}
-            lowPower={lowPower}
+            lowPower={visualLowPower}
             motionEnabled={motionEnabled}
           />
         </div>
