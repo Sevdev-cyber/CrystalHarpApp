@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [currentScale, setCurrentScale] = useState<ScaleType>('Chakra C');
   const [lastActivity, setLastActivity] = useState<number>(Date.now());
   const [lowPower, setLowPower] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [audioReady, setAudioReady] = useState(() => audioService.isRunning());
   const [isVisible, setIsVisible] = useState(true);
   const [isIdle, setIsIdle] = useState(false);
@@ -30,13 +31,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia) return;
-    const mediaQueries = [
-      window.matchMedia('(prefers-reduced-motion: reduce)'),
+    const reduceMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mobileQueries = [
       window.matchMedia('(pointer: coarse)'),
       window.matchMedia('(max-width: 768px)')
     ];
+    const mediaQueries = [reduceMotionQuery, ...mobileQueries];
     const updateLowPower = () => {
-      setLowPower(mediaQueries.some(mq => mq.matches));
+      const mobile = mobileQueries.some(mq => mq.matches);
+      setIsMobileViewport(mobile);
+      setLowPower(mobile || reduceMotionQuery.matches);
     };
     updateLowPower();
     mediaQueries.forEach(mq => {
@@ -86,7 +90,7 @@ const App: React.FC = () => {
     audioService.setVolume(isMuted ? 0 : volume);
   }, [volume, isMuted]);
 
-  const embeddedScrollLock = isEmbedded;
+  const embeddedScrollLock = isEmbedded && isMobileViewport;
   const useMobileEffects = true;
   const visualLowPower = lowPower || useMobileEffects;
   const reducedEffects = visualLowPower;
