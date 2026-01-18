@@ -106,7 +106,7 @@ const App: React.FC = () => {
   }, [embeddedScrollLock, reducedEffects]);
 
   return (
-    <div className={`relative w-full flex flex-col bg-white overflow-hidden select-none transition-colors duration-1000 ${embeddedScrollLock ? 'h-[100svh]' : 'min-h-screen'}`}>
+    <div className={`relative w-full flex flex-col bg-white overflow-x-hidden select-none transition-colors duration-1000 ${embeddedScrollLock ? 'h-[100svh] overflow-hidden' : 'min-h-screen'}`}>
       {/* Dynamic Ethereal Forest Background Visualization */}
       <BackgroundDynamics activityIntensity={lastActivity} lowPower={visualLowPower} motionEnabled={motionEnabled} />
 
