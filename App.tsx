@@ -19,7 +19,6 @@ const App: React.FC = () => {
   const [isIdle, setIsIdle] = useState(false);
   const [isEmbedded, setIsEmbedded] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const [isScrollable, setIsScrollable] = useState(false);
 
   const handleActivity = () => {
     setLastActivity(Date.now());
@@ -74,22 +73,6 @@ const App: React.FC = () => {
     updateVisibility();
     document.addEventListener('visibilitychange', updateVisibility);
     return () => document.removeEventListener('visibilitychange', updateVisibility);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const updateScrollState = () => {
-      const scrollHeight = document.documentElement.scrollHeight;
-      const viewportHeight = window.innerHeight || 0;
-      setIsScrollable(scrollHeight > viewportHeight + 16);
-    };
-    updateScrollState();
-    window.addEventListener('resize', updateScrollState);
-    window.addEventListener('load', updateScrollState);
-    return () => {
-      window.removeEventListener('resize', updateScrollState);
-      window.removeEventListener('load', updateScrollState);
-    };
   }, []);
 
   useEffect(() => {
@@ -196,13 +179,13 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {isScrollable && !hasScrolled && (
-        <div className="fixed bottom-16 left-0 right-0 z-20 flex items-center justify-center pointer-events-none">
-          <div className="flex flex-col items-center text-emerald-900/40 text-[9px] tracking-[0.35em] uppercase font-bold animate-bounce">
-            <span>Scroll</span>
-            <svg className="w-4 h-4 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 9l6 6 6-6" />
-            </svg>
+      {!hasScrolled && (
+        <div className="fixed bottom-12 left-0 right-0 z-20 flex items-center justify-center pointer-events-none">
+          <div className="relative flex flex-col items-center">
+            <div className="absolute -bottom-12 w-40 h-40 rounded-full bg-emerald-200/20 blur-3xl"></div>
+            <div className="absolute -bottom-8 w-28 h-28 rounded-full bg-teal-200/20 blur-2xl"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/70 shadow-[0_0_18px_rgba(16,185,129,0.45)] animate-pulse"></div>
+            <div className="mt-2 w-5 h-5 rounded-full border border-emerald-300/50 animate-pulse"></div>
           </div>
         </div>
       )}
