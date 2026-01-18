@@ -18,6 +18,8 @@ const App: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [isIdle, setIsIdle] = useState(false);
   const [isEmbedded, setIsEmbedded] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+  const [isScrollable, setIsScrollable] = useState(false);
 
   const handleActivity = () => {
     setLastActivity(Date.now());
@@ -72,6 +74,34 @@ const App: React.FC = () => {
     updateVisibility();
     document.addEventListener('visibilitychange', updateVisibility);
     return () => document.removeEventListener('visibilitychange', updateVisibility);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const updateScrollState = () => {
+      const scrollHeight = document.documentElement.scrollHeight;
+      const viewportHeight = window.innerHeight || 0;
+      setIsScrollable(scrollHeight > viewportHeight + 16);
+    };
+    updateScrollState();
+    window.addEventListener('resize', updateScrollState);
+    window.addEventListener('load', updateScrollState);
+    return () => {
+      window.removeEventListener('resize', updateScrollState);
+      window.removeEventListener('load', updateScrollState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setHasScrolled(true);
+      }
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
@@ -165,6 +195,17 @@ const App: React.FC = () => {
           />
         </div>
       </main>
+
+      {isScrollable && !hasScrolled && (
+        <div className="fixed bottom-16 left-0 right-0 z-20 flex items-center justify-center pointer-events-none">
+          <div className="flex flex-col items-center text-emerald-900/40 text-[9px] tracking-[0.35em] uppercase font-bold animate-bounce">
+            <span>Scroll</span>
+            <svg className="w-4 h-4 mt-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 9l6 6 6-6" />
+            </svg>
+          </div>
+        </div>
+      )}
 
       <footer className="absolute bottom-6 left-0 right-0 text-center text-emerald-900/20 text-[9px] uppercase tracking-[0.6em] pointer-events-none font-bold">
         Sacred Forest Ancient Resonance
