@@ -113,7 +113,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Chakra C',
         subtitle: 'Pure Resonance',
         description: 'The classic chakra healing scale. Each note corresponds to one of the 7 energy centers. Ideal for full-body energy balancing and deep meditation.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/chakra-c-432hz-crystal-harp-sacred-forest',
         colors: { primary: '#10b981', secondary: '#34d399', glow: 'rgba(16,185,129,0.3)' },
         notes: [
             makeNote('C5', '#EF4444', 'Root'),
@@ -131,7 +131,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Celtic Moon D',
         subtitle: 'Lunar Energy',
         description: 'A mystical, ethereal scale inspired by Celtic tradition. Evokes moonlit landscapes and deep intuition. Perfect for evening meditation and emotional healing.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/celtic-moon-d',
         colors: { primary: '#818CF8', secondary: '#A5B4FC', glow: 'rgba(129,140,248,0.3)' },
         notes: [
             makeNote('D5', '#A5F3FC'),
@@ -149,7 +149,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Celestial Sun D',
         subtitle: 'Solar Radiance',
         description: 'A warm, uplifting scale that channels solar energy. Promotes vitality, confidence, and joy. Ideal for morning practice and energizing sessions.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/crystal-harp-sun-d-432hz',
         colors: { primary: '#F59E0B', secondary: '#FCD34D', glow: 'rgba(245,158,11,0.3)' },
         notes: [
             makeNote('D5', '#FDE68A'),
@@ -167,7 +167,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Earth Om C#',
         subtitle: 'Ancient Roots',
         description: 'Tuned to the Earth\'s Om frequency (136.1 Hz overtone). Deeply grounding and centering. Used in traditional sound healing for reconnecting with nature.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/earth-om-cis',
         colors: { primary: '#22C55E', secondary: '#4ADE80', glow: 'rgba(34,197,94,0.3)' },
         notes: [
             makeNote('C#5', '#86EFAC'),
@@ -185,7 +185,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Mystic E',
         subtitle: 'Inner Vision',
         description: 'A scale of deep mystery and inner exploration. Opens the third eye and enhances intuition. Excellent for visualization and dream work.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/mystic-e',
         colors: { primary: '#EC4899', secondary: '#F472B6', glow: 'rgba(236,72,153,0.3)' },
         notes: [
             makeNote('E5', '#F9A8D4'),
@@ -203,7 +203,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Stardust C#',
         subtitle: 'Cosmic Shimmer',
         description: 'A luminous, sparkling scale that evokes the vastness of the cosmos. Creates an ethereal atmosphere perfect for deep space meditation and astral work.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/stardust-c-crystal-harp-432-hz',
         colors: { primary: '#A855F7', secondary: '#C084FC', glow: 'rgba(168,85,247,0.3)' },
         notes: [
             makeNote('C#5', '#E9D5FF'),
@@ -221,7 +221,7 @@ export const SCALES: ScaleDefinition[] = [
         name: 'Planetary C',
         subtitle: 'Planetary Resonance',
         description: 'Based on planetary frequency ratios. A rich, enveloping minor scale that resonates with cosmic cycles. Ideal for deep relaxation and planetary healing.',
-        productUrl: '/collections/all',
+        productUrl: 'https://crystalharp.store/products/crystal-harp-planetary-c-432hz',
         colors: { primary: '#0EA5E9', secondary: '#38BDF8', glow: 'rgba(14,165,233,0.3)' },
         notes: [
             makeNote('C5', '#BAE6FD'),
