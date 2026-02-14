@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Harp Widget Demo — Shopify Embed Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #666;
+            margin-bottom: 2rem;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .product-card h2 {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-card p.desc {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px solid #eee;
+            margin: 1rem 0;
+        }
+
+        .embed-label {
+            font-size: 0.75rem;
+            color: #aaa;
+            text-align: center;
+            margin-top: 0.5rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="demo-container">
+        <h1>🔔 Crystal Harp Widget — Shopify Embed Preview</h1>
+
+        <!-- Product 1: Chakra C -->
+        <div class="product-card">
+            <h2>Crystal Harp — Chakra C</h2>
+            <p class="desc">The classic chakra healing scale. 432 Hz. Handcrafted quartz tubes.</p>
+            <hr>
+            <div data-crystal-harp data-scale="chakra-c" data-app-url="/"></div>
+            <p class="embed-label">▲ Interactive preview — tap tubes to play</p>
+        </div>
+
+        <!-- Product 2: Celtic Moon D -->
+        <div class="product-card">
+            <h2>Crystal Harp — Celtic Moon D</h2>
+            <p class="desc">Mystical, ethereal scale inspired by Celtic tradition. 432 Hz tuning.</p>
+            <hr>
+            <div data-crystal-harp data-scale="celtic-moon-d" data-app-url="/"></div>
+            <p class="embed-label">▲ Interactive preview — tap tubes to play</p>
+        </div>
+
+        <!-- Product 3: Earth Om C# -->
+        <div class="product-card">
+            <h2>Crystal Harp — Earth Om C#</h2>
+            <p class="desc">Tuned to the Earth's Om frequency. Deeply grounding and centering.</p>
+            <hr>
+            <div data-crystal-harp data-scale="earth-om-c#" data-app-url="/"></div>
+            <p class="embed-label">▲ Interactive preview — tap tubes to play</p>
+        </div>
+    </div>
+
+    <script type="module" src="/src/widget.ts"></script>
+</body>
+
+</html>

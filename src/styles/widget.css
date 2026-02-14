@@ -1,0 +1,162 @@
+/**
+ * Crystal Harp Widget — Minimal Styles
+ * Scoped under .ch-widget to avoid Shopify theme conflicts
+ */
+
+.ch-widget {
+    position: relative;
+    max-width: 600px;
+    margin: 1.5rem auto;
+    padding: 1rem 0.5rem;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: none;
+}
+
+/* Prompt */
+.ch-prompt {
+    text-align: center;
+    padding: 0.5rem 1rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.8rem;
+    color: #888;
+    letter-spacing: 0.03em;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.ch-prompt-icon {
+    font-size: 1rem;
+    margin-right: 0.3rem;
+}
+
+.ch-prompt.ch-hidden {
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* Tubes container */
+.ch-tubes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(3px, 0.8vw, 6px);
+    width: 100%;
+}
+
+/* Individual tube */
+.ch-tube {
+    position: relative;
+    width: var(--ch-tube-w, 80%);
+    height: var(--ch-tube-h, 40px);
+    border-radius: 20px;
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.97) 0%,
+            rgba(255, 255, 255, 0.85) 20%,
+            color-mix(in srgb, var(--ch-tube-color) 10%, white) 50%,
+            rgba(255, 255, 255, 0.85) 80%,
+            rgba(255, 255, 255, 0.97) 100%);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
+    box-shadow:
+        inset 0 3px 8px rgba(255, 255, 255, 0.6),
+        inset 0 -2px 6px rgba(255, 255, 255, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        0 1px 3px rgba(0, 0, 0, 0.04);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    overflow: visible;
+}
+
+.ch-tube:hover {
+    transform: scale(1.015);
+    box-shadow:
+        inset 0 3px 8px rgba(255, 255, 255, 0.6),
+        0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.ch-tube:active {
+    transform: scale(0.99);
+}
+
+/* Playing state */
+.ch-tube.ch-playing {
+    box-shadow:
+        inset 0 3px 8px rgba(255, 255, 255, 0.6),
+        0 0 20px var(--ch-tube-color, rgba(100, 200, 255, 0.3)),
+        0 0 40px var(--ch-tube-color, rgba(100, 200, 255, 0.15));
+    border-color: color-mix(in srgb, var(--ch-tube-color) 40%, white);
+}
+
+/* Glow */
+.ch-glow {
+    position: absolute;
+    inset: -4px;
+    border-radius: 24px;
+    background: var(--ch-tube-color);
+    opacity: 0;
+    filter: blur(12px);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.ch-tube.ch-playing .ch-glow {
+    opacity: 0.25;
+}
+
+/* Note label */
+.ch-label {
+    position: absolute;
+    right: 12px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.35);
+    letter-spacing: 0.03em;
+    pointer-events: none;
+}
+
+.ch-tube.ch-playing .ch-label {
+    color: color-mix(in srgb, var(--ch-tube-color) 70%, black);
+}
+
+/* Compare link */
+.ch-compare-link {
+    display: block;
+    text-align: center;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--ch-accent, #6366f1);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.ch-compare-link:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .ch-widget {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .ch-tube {
+        border-radius: 16px;
+    }
+
+    .ch-label {
+        font-size: 0.55rem;
+        right: 8px;
+    }
+}
