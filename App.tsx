@@ -103,7 +103,6 @@ const App: React.FC = () => {
     audioService.setVolume(isMuted ? 0 : volume);
   }, [volume, isMuted]);
 
-  const embeddedScrollLock = isEmbedded && isMobileViewport;
   const useMobileEffects = true;
   const visualLowPower = lowPower || useMobileEffects;
   const reducedEffects = visualLowPower;
@@ -113,13 +112,11 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (typeof document === 'undefined') return;
-    document.body.classList.toggle('embedded', embeddedScrollLock);
-    document.documentElement.classList.toggle('embedded', embeddedScrollLock);
     document.body.classList.toggle('reduced-effects', reducedEffects);
-  }, [embeddedScrollLock, reducedEffects]);
+  }, [reducedEffects]);
 
   return (
-    <div className={`relative w-full flex flex-col bg-white overflow-x-hidden select-none transition-colors duration-1000 ${embeddedScrollLock ? 'h-[100svh] overflow-hidden' : 'min-h-screen'}`}>
+    <div className="relative w-full flex flex-col bg-white overflow-x-hidden select-none transition-colors duration-1000 min-h-screen">
       {/* Dynamic Ethereal Forest Background Visualization */}
       <BackgroundDynamics activityIntensity={lastActivity} lowPower={visualLowPower} motionEnabled={motionEnabled} />
 
@@ -127,8 +124,8 @@ const App: React.FC = () => {
       <div className={`absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-100/30 rounded-full blur-glow ${pulseClass}`}></div>
       <div className={`absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] bg-teal-100/20 rounded-full blur-glow ${lowPower ? '' : 'animate-pulse delay-700'}`}></div>
       <div className={`absolute top-[20%] right-[-5%] w-[30%] h-[40%] bg-blue-100/10 rounded-full blur-glow ${lowPower ? '' : 'animate-pulse delay-1000'}`}></div>
-      
-      <Header 
+
+      <Header
         isMuted={isMuted}
         onMuteToggle={() => setIsMuted(!isMuted)}
         volume={volume}
@@ -152,7 +149,7 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className={`flex-1 flex flex-col items-center justify-center p-4 min-h-0 z-10 ${embeddedScrollLock ? 'overflow-y-auto overscroll-contain' : ''}`}>
+      <main className="flex-1 flex flex-col items-center justify-center p-4 min-h-0 z-10">
         <div className="w-full max-w-5xl transition-all duration-1000 ease-in-out opacity-100 transform translate-y-0">
           <div className="text-center mb-8">
             <h2 className="text-4xl md:text-6xl font-bold mb-3 text-iridescent italic px-4">
@@ -170,8 +167,8 @@ const App: React.FC = () => {
             />
           </div>
 
-          <CrystalHarp 
-            notes={SCALES[currentScale]} 
+          <CrystalHarp
+            notes={SCALES[currentScale]}
             onInteract={handleActivity}
             lowPower={visualLowPower}
             motionEnabled={motionEnabled}

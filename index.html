@@ -1,61 +1,55 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sacred Forest Crystal Harp</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+    rel="stylesheet">
   <style>
-    html, body {
-      height: 100%;
-      width: 100%;
-      overscroll-behavior: contain;
-    }
+    html,
     body {
-      font-family: 'Quicksand', sans-serif;
+      width: 100%;
       margin: 0;
       padding: 0;
+    }
+
+    body {
+      font-family: 'Quicksand', sans-serif;
       overflow-y: auto;
       overflow-x: hidden;
       background: #fdfdfd;
       min-height: 100vh;
-      min-height: 100svh;
+      -webkit-overflow-scrolling: touch;
     }
+
     #root {
       min-height: 100%;
     }
-    h1, h2, h3 {
+
+    h1,
+    h2,
+    h3 {
       font-family: 'Playfair+Display', serif;
     }
+
     .blur-glow {
       filter: blur(120px);
       opacity: 0.15;
     }
-    html.embedded,
-    body.embedded {
-      height: 100%;
-      overflow: hidden;
-      overscroll-behavior: none;
-    }
-    body.embedded {
-      min-height: 100%;
-    }
-    body.embedded #root {
-      height: 100%;
-    }
-    body.embedded main {
-      -webkit-overflow-scrolling: touch;
-    }
+
     body.reduced-effects .blur-glow {
       filter: blur(80px);
       opacity: 0.1;
     }
+
     body.reduced-effects .text-iridescent {
       animation: none;
     }
-    
+
     /* Loading Animation */
     #loading-screen {
       position: fixed;
@@ -68,6 +62,7 @@
       justify-content: center;
       transition: opacity 0.5s ease;
     }
+
     .loader {
       width: 40px;
       height: 40px;
@@ -76,8 +71,13 @@
       border-top-color: #10b981;
       animation: spin 1s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     .text-iridescent {
       background: linear-gradient(135deg, #10b981 0%, #34d399 25%, #60a5fa 50%, #a78bfa 75%, #f472b6 100%);
       -webkit-background-clip: text;
@@ -85,13 +85,22 @@
       background-size: 200% 200%;
       animation: iridescent-flow 10s ease infinite;
     }
+
     @keyframes iridescent-flow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
     }
   </style>
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
@@ -103,33 +112,36 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
+
 <body class="bg-emerald-50/10 text-slate-900">
-  
+
   <!-- Loading Indicator -->
   <div id="loading-screen">
     <div class="loader"></div>
-    <p style="margin-top: 20px; color: #64748b; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;">Awakening Crystals...</p>
+    <p style="margin-top: 20px; color: #64748b; font-size: 14px; letter-spacing: 0.1em; text-transform: uppercase;">
+      Awakening Crystals...</p>
   </div>
 
   <div id="root"></div>
-  
+
   <!-- VITE ENTRY POINT -->
   <script type="module" src="./index.tsx"></script>
-  
+
   <script>
     // Hide loader when app mounts
     window.onload = () => {
       setTimeout(() => {
         const loader = document.getElementById('loading-screen');
-        if(loader) {
+        if (loader) {
           loader.style.opacity = '0';
           setTimeout(() => loader.remove(), 500);
         }
       }, 500);
     };
   </script>
-<script type="module" src="/index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>
