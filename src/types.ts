@@ -43,12 +43,33 @@ function noteToFreq(note: string): number {
 }
 
 /**
+ * Normalize flat notes to sharp equivalents (Eb→D#, Ab→G#, Bb→A#)
+ */
+function normalizeNote(note: string): string {
+    const flatToSharp: Record<string, string> = {
+        Db: 'C#', Eb: 'D#', Fb: 'E', Gb: 'F#', Ab: 'G#', Bb: 'A#', Cb: 'B',
+    };
+    const m = note.match(/^([A-G])(b)(\d)$/);
+    if (m && flatToSharp[m[1] + m[2]]) {
+        return flatToSharp[m[1] + m[2]] + m[3];
+    }
+    return note;
+}
+
+/**
  * Calculate semitone shift from nearest recorded sample.
- * Recorded samples: C5, D5, E5, F5, G5, A5, B5, C6
- * (chromatic notes derived by pitch-shifting ±1-2 semitones)
+ * We have all 18 chromatic samples from C5 to F6.
  */
 function calcShift(note: string): { shift: number; sampleKey: string } {
-    const recorded = ['C5', 'D5', 'E5', 'F5', 'G5', 'A5', 'B5', 'C6'];
+    // Normalize flats to sharps first
+    const normalized = normalizeNote(note);
+
+    // All 18 chromatic samples we actually have
+    const recorded = [
+        'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5',
+        'G5', 'G#5', 'A5', 'A#5', 'B5',
+        'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6',
+    ];
     const noteToSemitone = (n: string): number => {
         const m = n.match(/^([A-G])([#b]?)(\d)$/);
         if (!m) return 0;
@@ -59,7 +80,7 @@ function calcShift(note: string): { shift: number; sampleKey: string } {
         return (parseInt(m[3]) + 1) * 12 + s;
     };
 
-    const targetSemi = noteToSemitone(note);
+    const targetSemi = noteToSemitone(normalized);
     let bestSample = recorded[0];
     let bestShift = 999;
 

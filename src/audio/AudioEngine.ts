@@ -99,17 +99,35 @@ export class AudioEngine {
     }
 
     /**
+     * Normalize flat labels to sharp equivalents for sample lookup
+     */
+    private normalizeLabel(label: string): string {
+        const flatToSharp: Record<string, string> = {
+            Db: 'C#', Eb: 'D#', Fb: 'E', Gb: 'F#', Ab: 'G#', Bb: 'A#', Cb: 'B',
+        };
+        const m = label.match(/^([A-G])(b)(\d)$/);
+        if (m && flatToSharp[m[1] + m[2]]) {
+            return flatToSharp[m[1] + m[2]] + m[3];
+        }
+        return label;
+    }
+
+    /**
      * Play a note — either from sample (with pitch shift) or synthesized
      */
     play(note: ScaleNote): void {
         if (!this.ctx || !this.masterGain || this._muted) return;
 
-        // Stop any existing instance with very short crossfade (prevents stutter)
-        this.stopNote(note.label, 0.03);
+        // Normalize flat labels to sharp for sample lookups
+        const normalizedLabel = this.normalizeLabel(note.label);
+        const normalizedSampleKey = this.normalizeLabel(note.sampleKey);
+
+        // Fade out any existing instance of this note (natural overlap, no clicks)
+        this.stopNote(note.label, 0.08);
 
         // Try exact sample match first (best quality), then nearest with pitch-shift
-        const exactKey = `mallet:${note.label}`;
-        const shiftKey = `mallet:${note.sampleKey}`;
+        const exactKey = `mallet:${normalizedLabel}`;
+        const shiftKey = `mallet:${normalizedSampleKey}`;
         const exactBuffer = this.sampleBuffers.get(exactKey);
         const shiftBuffer = this.sampleBuffers.get(shiftKey);
 
