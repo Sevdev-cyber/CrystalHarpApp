@@ -23,7 +23,7 @@ export class AudioEngine {
     private useSamples = false;
 
     // Sample base path (will be Shopify asset URL in production)
-    private sampleBasePath = '/samples';
+    private sampleBasePath = `${import.meta.env.BASE_URL}samples`;
 
     async init(): Promise<boolean> {
         try {
