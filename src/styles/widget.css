@@ -11,7 +11,7 @@
     font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    touch-action: none;
+    touch-action: pan-y;
 }
 
 /* Prompt */
@@ -130,8 +130,8 @@
 .ch-compare-link {
     display: block;
     text-align: center;
-    margin-top: 0.75rem;
-    padding: 0.5rem 1rem;
+    margin-top: 2rem;
+    padding: 0.45rem 1rem;
     font-size: 0.78rem;
     font-weight: 500;
     color: var(--ch-accent, #6366f1);

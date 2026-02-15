@@ -224,8 +224,7 @@ class CrystalHarpWidget {
         tube.appendChild(glow);
 
         // Events
-        tube.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
+        tube.addEventListener('pointerdown', () => {
             this.triggerNote(index);
             this.isDragging = true;
             this.lastTriggered = index;

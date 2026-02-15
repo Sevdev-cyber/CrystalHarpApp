@@ -64,7 +64,7 @@ export class HarpView {
         tube.style.setProperty('--tube-width', `${width}%`);
 
         // Height (thickness): uniform for easy tapping
-        tube.style.setProperty('--tube-height', 'clamp(40px, 9vw, 58px)');
+        tube.style.setProperty('--tube-height', 'clamp(44px, 10vw, 60px)');
         tube.style.setProperty('--tube-color', note.color);
         tube.style.setProperty('--tube-index', String(index));
 
