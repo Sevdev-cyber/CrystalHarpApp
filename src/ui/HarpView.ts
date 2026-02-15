@@ -11,7 +11,7 @@ export class HarpView {
     private currentScale: ScaleDefinition | null = null;
     private isDragging = false;
     private lastTriggeredTube = -1;
-    private onNotePlay?: (note: ScaleNote, index: number) => void;
+    private onNotePlay?: () => Promise<void>;
 
     constructor(container: HTMLElement) {
         this.container = container;
@@ -19,7 +19,7 @@ export class HarpView {
         this.setupGlobalListeners();
     }
 
-    setOnNotePlay(cb: (note: ScaleNote, index: number) => void) {
+    setOnNotePlay(cb: () => Promise<void>) {
         this.onNotePlay = cb;
     }
 
@@ -117,12 +117,12 @@ export class HarpView {
         });
     }
 
-    private triggerNote(index: number): void {
+    private async triggerNote(index: number): Promise<void> {
         if (!this.currentScale) return;
+        await this.onNotePlay?.();
         const note = this.currentScale.notes[index];
         audioEngine.play(note);
         this.animateTube(index);
-        this.onNotePlay?.(note, index);
     }
 
     private animateTube(index: number): void {

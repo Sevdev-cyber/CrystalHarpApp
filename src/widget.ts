@@ -69,7 +69,7 @@ class WidgetAudio {
             this.masterGain = this.ctx.createGain();
             this.masterGain.gain.value = 0.7;
             this.masterGain.connect(this.ctx.destination);
-            if (!this.loaded && !this.loading) this.loadSamples();
+            if (!this.loaded && !this.loading) await this.loadSamples();
             return true;
         } catch {
             return false;

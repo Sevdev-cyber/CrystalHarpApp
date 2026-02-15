@@ -95,9 +95,7 @@ class CrystalHarpApp {
     // Harp view
     const harpEl = document.getElementById('harp-container')!;
     this.harpView = new HarpView(harpEl);
-    this.harpView.setOnNotePlay(() => {
-      this.ensureAudio();
-    });
+    this.harpView.setOnNotePlay(() => this.ensureAudio());
 
     // Scale info (must init BEFORE ScaleWheel.render triggers switchScale)
     const infoEl = document.getElementById('scale-info-container')!;
