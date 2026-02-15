@@ -161,11 +161,6 @@ class CrystalHarpWidget {
         this.container.style.setProperty('--ch-accent', this.scale.colors.primary);
         this.container.style.setProperty('--ch-glow', this.scale.colors.glow);
 
-        // Prompt
-        const prompt = document.createElement('div');
-        prompt.className = 'ch-prompt';
-        prompt.innerHTML = `<span class="ch-prompt-icon">🔔</span> <span>Tap to play · ${this.scale.name} · 432 Hz</span>`;
-
         // Tubes container
         const tubesWrap = document.createElement('div');
         tubesWrap.className = 'ch-tubes';
@@ -181,7 +176,6 @@ class CrystalHarpWidget {
             tubesWrap.appendChild(tube);
         });
 
-        this.container.appendChild(prompt);
         this.container.appendChild(tubesWrap);
 
         // "Compare other scales" link
@@ -243,9 +237,6 @@ class CrystalHarpWidget {
     private async triggerNote(index: number): Promise<void> {
         if (!this.audioReady) {
             this.audioReady = await this.audio.init();
-            // Hide prompt
-            const prompt = this.container.querySelector('.ch-prompt');
-            if (prompt) prompt.classList.add('ch-hidden');
         }
 
         const note = this.scale.notes[index];
