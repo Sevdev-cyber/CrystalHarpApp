@@ -19,7 +19,6 @@ class CrystalHarpApp {
   async init(): Promise<void> {
     this.createLayout();
     this.setupComponents();
-    this.showAudioPrompt();
   }
 
   private createLayout(): void {
@@ -43,14 +42,6 @@ class CrystalHarpApp {
           <h2 class="cha-title">Sacred Forest Crystal Harp</h2>
           <p class="cha-subtitle" id="cha-subtitle">432 Hz · Pure Quartz</p>
         </header>
-
-        <!-- Audio unlock prompt -->
-        <div class="cha-audio-prompt" id="audio-prompt">
-          <button class="audio-unlock-btn" id="audio-unlock">
-            <span class="unlock-icon">🔔</span>
-            <span>Enable Sound</span>
-          </button>
-        </div>
 
         <!-- Scale Wheel -->
         <div id="scale-wheel-container"></div>
@@ -187,33 +178,32 @@ class CrystalHarpApp {
     document.documentElement.style.setProperty('--accent-glow', scale.colors.glow);
   }
 
-  private showAudioPrompt(): void {
-    const btn = document.getElementById('audio-unlock');
-    const prompt = document.getElementById('audio-prompt');
-    if (!btn || !prompt) return;
-
-    btn.addEventListener('click', async () => {
-      await this.ensureAudio();
-      prompt.classList.add('hidden');
-    });
-  }
-
   private async ensureAudio(): Promise<void> {
     if (this.audioInitialized) return;
     const ok = await audioEngine.unlock();
     if (ok) {
       this.audioInitialized = true;
-      const prompt = document.getElementById('audio-prompt');
-      if (prompt) prompt.classList.add('hidden');
     }
   }
 }
 
 // --- Iframe height reporting (auto-resize when embedded) ---
+let lastReportedHeight = 0;
+let reportTimer: ReturnType<typeof setTimeout> | null = null;
+
 function reportHeight(): void {
   if (window.parent === window) return; // not in iframe
-  const height = document.documentElement.scrollHeight;
-  window.parent.postMessage({ type: 'crystal-harp-height', height }, '*');
+  if (reportTimer) return; // already scheduled
+  reportTimer = setTimeout(() => {
+    reportTimer = null;
+    const wrapper = document.querySelector('.cha-wrapper');
+    const height = wrapper ? wrapper.scrollHeight : document.body.scrollHeight;
+    // Only report if height actually changed (avoid infinite loop)
+    if (Math.abs(height - lastReportedHeight) > 5) {
+      lastReportedHeight = height;
+      window.parent.postMessage({ type: 'crystal-harp-height', height }, '*');
+    }
+  }, 200);
 }
 
 // --- App initialization ---
@@ -223,18 +213,13 @@ const app = new CrystalHarpApp();
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     app.init();
-    // Report height after init + small delay for layout
-    setTimeout(reportHeight, 300);
-    setTimeout(reportHeight, 1000);
-    // Keep reporting on resize
+    setTimeout(reportHeight, 500);
+    setTimeout(reportHeight, 1500);
     window.addEventListener('resize', reportHeight);
-    // Observe DOM changes (scale switches etc.)
-    new MutationObserver(reportHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
   });
 } else {
   app.init();
-  setTimeout(reportHeight, 300);
-  setTimeout(reportHeight, 1000);
+  setTimeout(reportHeight, 500);
+  setTimeout(reportHeight, 1500);
   window.addEventListener('resize', reportHeight);
-  new MutationObserver(reportHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
 }
