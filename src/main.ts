@@ -209,12 +209,32 @@ class CrystalHarpApp {
   }
 }
 
+// --- Iframe height reporting (auto-resize when embedded) ---
+function reportHeight(): void {
+  if (window.parent === window) return; // not in iframe
+  const height = document.documentElement.scrollHeight;
+  window.parent.postMessage({ type: 'crystal-harp-height', height }, '*');
+}
+
 // --- App initialization ---
 const app = new CrystalHarpApp();
 
 // Wait for DOM
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => app.init());
+  document.addEventListener('DOMContentLoaded', () => {
+    app.init();
+    // Report height after init + small delay for layout
+    setTimeout(reportHeight, 300);
+    setTimeout(reportHeight, 1000);
+    // Keep reporting on resize
+    window.addEventListener('resize', reportHeight);
+    // Observe DOM changes (scale switches etc.)
+    new MutationObserver(reportHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
+  });
 } else {
   app.init();
+  setTimeout(reportHeight, 300);
+  setTimeout(reportHeight, 1000);
+  window.addEventListener('resize', reportHeight);
+  new MutationObserver(reportHeight).observe(document.body, { childList: true, subtree: true, attributes: true });
 }
