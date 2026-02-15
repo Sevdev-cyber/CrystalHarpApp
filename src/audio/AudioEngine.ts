@@ -53,7 +53,7 @@ export class AudioEngine {
     private async loadSamples(): Promise<void> {
         // Quick pre-check: test if any sample exists before trying all
         try {
-            const probe = await fetch(`${this.sampleBasePath}/mallet/C5.mp3`, { method: 'HEAD' });
+            const probe = await fetch(`${this.sampleBasePath}/mallet/Cs5.mp3`, { method: 'HEAD' });
             if (!probe.ok) {
                 console.log('AudioEngine: no samples found, using synthesis');
                 this.useSamples = false;
@@ -65,11 +65,12 @@ export class AudioEngine {
             return;
         }
 
-        // Full chromatic set C5–F6 (432Hz tuned)
+        // Available samples (high-quality 320kbps recordings)
+        // Missing notes are pitch-shifted from nearest available sample
         const sampleNames = [
-            'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5',
-            'G5', 'G#5', 'A5', 'A#5', 'B5',
-            'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6',
+            'C#5', 'D5', 'D#5', 'F#5',
+            'G#5', 'A#5', 'B5',
+            'C6', 'C#6', 'E6',
         ];
 
         // Load all samples in parallel for speed

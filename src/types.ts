@@ -58,17 +58,17 @@ function normalizeNote(note: string): string {
 
 /**
  * Calculate semitone shift from nearest recorded sample.
- * We have all 18 chromatic samples from C5 to F6.
+ * We have 10 high-quality chromatic samples.
  */
 function calcShift(note: string): { shift: number; sampleKey: string } {
     // Normalize flats to sharps first
     const normalized = normalizeNote(note);
 
-    // All 18 chromatic samples we actually have
+    // All 10 high-quality samples we actually have
     const recorded = [
-        'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5',
-        'G5', 'G#5', 'A5', 'A#5', 'B5',
-        'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6',
+        'C#5', 'D5', 'D#5', 'F#5',
+        'G#5', 'A#5', 'B5',
+        'C6', 'C#6', 'E6',
     ];
     const noteToSemitone = (n: string): number => {
         const m = n.match(/^([A-G])([#b]?)(\d)$/);
