@@ -4,19 +4,60 @@
  * 
  * Usage:
  *   <div data-crystal-harp data-scale="chakra-c"></div>
- *   <script src="crystal-harp-widget.js" defer></script>
+ *   <script src="crystal-harp-widget.iife.js" defer></script>
  */
 
 import { SCALES } from './types';
 import type { ScaleDefinition, ScaleNote } from './types';
 import './styles/widget.css';
 
-// ─── Lightweight Audio Engine (subset of full AudioEngine) ─────────
+// ─── Sample-based Audio Engine ─────────────────────────────────────
+
+const SAMPLE_BASE = 'https://sevdev-cyber.github.io/CrystalHarpApp/samples/mallet/';
+const ALL_NOTES = [
+    'C5', 'C#5', 'D5', 'D#5', 'E5', 'F5', 'F#5', 'G5', 'G#5', 'A5', 'A#5', 'B5',
+    'C6', 'C#6', 'D6', 'D#6', 'E6', 'F6'
+];
+
+function noteToSemitone(note: string): number {
+    const map: Record<string, number> = {
+        'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5,
+        'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11
+    };
+    const m = note.match(/^([A-G]#?)(\d)$/);
+    if (!m) return 0;
+    return (parseInt(m[2]) + 1) * 12 + (map[m[1]] ?? 0);
+}
+
+function normalizeLabel(label: string): string {
+    const flatMap: Record<string, string> = {
+        'Db': 'C#', 'Eb': 'D#', 'Fb': 'E', 'Gb': 'F#',
+        'Ab': 'G#', 'Bb': 'A#', 'Cb': 'B'
+    };
+    for (const [flat, sharp] of Object.entries(flatMap)) {
+        if (label.startsWith(flat)) return sharp + label.slice(flat.length);
+    }
+    return label;
+}
+
+function findNearestSample(targetNote: string): { sampleNote: string; shift: number } {
+    const normalized = normalizeLabel(targetNote);
+    const targetSemi = noteToSemitone(normalized);
+    let best = ALL_NOTES[0], bestDiff = 999;
+    for (const n of ALL_NOTES) {
+        const d = targetSemi - noteToSemitone(n);
+        if (Math.abs(d) < Math.abs(bestDiff)) { bestDiff = d; best = n; }
+    }
+    return { sampleNote: best, shift: bestDiff };
+}
 
 class WidgetAudio {
     private ctx: AudioContext | null = null;
     private masterGain: GainNode | null = null;
-    private activeNotes: Map<string, { osc: OscillatorNode; gain: GainNode }> = new Map();
+    private buffers: Map<string, AudioBuffer> = new Map();
+    private activeNotes: Map<string, { source: AudioBufferSourceNode; gain: GainNode }> = new Map();
+    private loading = false;
+    private loaded = false;
 
     async init(): Promise<boolean> {
         if (this.ctx) {
@@ -28,57 +69,57 @@ class WidgetAudio {
             this.masterGain = this.ctx.createGain();
             this.masterGain.gain.value = 0.7;
             this.masterGain.connect(this.ctx.destination);
+            if (!this.loaded && !this.loading) this.loadSamples();
             return true;
         } catch {
             return false;
         }
     }
 
+    private async loadSamples(): Promise<void> {
+        if (!this.ctx || this.loading) return;
+        this.loading = true;
+        const noteToFile = (n: string) => n.replace('#', 's') + '.mp3';
+
+        await Promise.all(ALL_NOTES.map(async (note) => {
+            try {
+                const resp = await fetch(SAMPLE_BASE + noteToFile(note));
+                if (!resp.ok) return;
+                const buf = await this.ctx!.decodeAudioData(await resp.arrayBuffer());
+                this.buffers.set(note, buf);
+            } catch { /* skip failed samples */ }
+        }));
+
+        this.loaded = true;
+        this.loading = false;
+    }
+
     play(note: ScaleNote): void {
         if (!this.ctx || !this.masterGain) return;
 
-        // Stop existing instance of this note
+        const label = normalizeLabel(note.label);
         this.stop(note.label);
 
-        const now = this.ctx.currentTime;
+        // Find exact or nearest sample
+        const exactBuf = this.buffers.get(label);
+        const { sampleNote, shift } = findNearestSample(label);
+        const nearBuf = this.buffers.get(sampleNote);
 
-        // Main oscillator (sine — crystal purity)
-        const osc = this.ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = note.freq;
+        const buffer = exactBuf || nearBuf;
+        if (!buffer) return;
 
-        // Harmonic overtone (octave, quieter)
-        const osc2 = this.ctx.createOscillator();
-        osc2.type = 'sine';
-        osc2.frequency.value = note.freq * 2;
+        const source = this.ctx.createBufferSource();
+        source.buffer = buffer;
+        source.playbackRate.value = exactBuf ? 1.0 : Math.pow(2, shift / 12);
 
         const gain = this.ctx.createGain();
-        const gain2 = this.ctx.createGain();
-
-        // Crystal envelope: instant attack, long natural decay
-        const attackTime = 0.005;
-        const decayTime = 15;
-
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.7, now + attackTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + decayTime);
-
-        gain2.gain.setValueAtTime(0, now);
-        gain2.gain.linearRampToValueAtTime(0.1, now + attackTime);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + decayTime * 0.4);
-
-        osc.connect(gain);
-        osc2.connect(gain2);
+        gain.gain.value = 1.0;
+        source.connect(gain);
         gain.connect(this.masterGain);
-        gain2.connect(this.masterGain);
+        source.start();
 
-        osc.start();
-        osc2.start();
-        osc.stop(now + decayTime + 0.1);
-        osc2.stop(now + decayTime * 0.4 + 0.1);
-
-        osc.onended = () => this.activeNotes.delete(note.label);
-        this.activeNotes.set(note.label, { osc, gain });
+        source.onended = () => this.activeNotes.delete(note.label);
+        this.activeNotes.set(note.label, { source, gain });
     }
 
     stop(label: string): void {
@@ -89,7 +130,7 @@ class WidgetAudio {
         active.gain.gain.setValueAtTime(active.gain.gain.value, now);
         active.gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         setTimeout(() => {
-            try { active.osc.stop(); } catch { /* ok */ }
+            try { active.source.stop(); } catch { /* ok */ }
             this.activeNotes.delete(label);
         }, 350);
     }

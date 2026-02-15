@@ -1,7 +1,7 @@
 /**
  * Crystal Harp Audio Engine
  * Handles loading real samples, pitch-shifting, playback with long sustain,
- * and glissando. Falls back to synthesized tones if samples unavailable.
+ * and glissando.
  */
 
 import type { PlayMode, ScaleNote } from '../types';
@@ -113,7 +113,7 @@ export class AudioEngine {
     }
 
     /**
-     * Play a note — either from sample (with pitch shift) or synthesized
+     * Play a note from sample (with optional pitch shift)
      */
     play(note: ScaleNote): void {
         if (!this.ctx || !this.masterGain || this._muted) return;
@@ -166,82 +166,14 @@ export class AudioEngine {
                 this.activeNotes.delete(note.label);
             };
         } else {
-            // --- Synthesized fallback (crystal-like tone) ---
-            active = this.playSynthesized(note);
+            // No sample available — skip this note
+            return;
         }
 
         this.activeNotes.set(note.label, active);
     }
 
-    /**
-     * Synthesized crystal harp tone (placeholder until real samples)
-     * Creates a bell-like tone with slow decay (~20-30 seconds)
-     */
-    private playSynthesized(note: ScaleNote): ActiveNote {
-        const ctx = this.ctx!;
-        const now = ctx.currentTime;
 
-        // Main oscillator (sine for crystal purity)
-        const osc = ctx.createOscillator();
-        osc.type = 'sine';
-        osc.frequency.value = note.freq;
-
-        // Harmonic overtones for crystal character
-        const osc2 = ctx.createOscillator();
-        osc2.type = 'sine';
-        osc2.frequency.value = note.freq * 2; // octave
-
-        const osc3 = ctx.createOscillator();
-        osc3.type = 'sine';
-        osc3.frequency.value = note.freq * 3; // fifth above octave
-
-        // Gains for each oscillator
-        const gain = ctx.createGain();
-        const gain2 = ctx.createGain();
-        const gain3 = ctx.createGain();
-
-        // Crystal-like envelope: quick attack, very long decay
-        const attackTime = this._mode === 'mallet' ? 0.005 : 0.3; // mallet = instant, water = slow attack
-        const sustainLevel = this._mode === 'mallet' ? 0.8 : 0.6;
-        const decayTime = 25; // 25 seconds natural decay
-
-        // Main tone
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(sustainLevel, now + attackTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + decayTime);
-
-        // Overtone 1 (octave) — decays faster
-        gain2.gain.setValueAtTime(0, now);
-        gain2.gain.linearRampToValueAtTime(sustainLevel * 0.15, now + attackTime);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + decayTime * 0.4);
-
-        // Overtone 2 (higher) — decays fastest
-        gain3.gain.setValueAtTime(0, now);
-        gain3.gain.linearRampToValueAtTime(sustainLevel * 0.05, now + attackTime * 0.5);
-        gain3.gain.exponentialRampToValueAtTime(0.001, now + decayTime * 0.2);
-
-        osc.connect(gain);
-        osc2.connect(gain2);
-        osc3.connect(gain3);
-        gain.connect(this.masterGain!);
-        gain2.connect(this.masterGain!);
-        gain3.connect(this.masterGain!);
-
-        osc.start();
-        osc2.start();
-        osc3.start();
-
-        // Auto-stop after decay
-        osc.stop(now + decayTime + 0.1);
-        osc2.stop(now + decayTime * 0.4 + 0.1);
-        osc3.stop(now + decayTime * 0.2 + 0.1);
-
-        osc.onended = () => {
-            this.activeNotes.delete(note.label);
-        };
-
-        return { source: osc, gain, startTime: now };
-    }
 
     /**
      * Play glissando — rapid note sequence
