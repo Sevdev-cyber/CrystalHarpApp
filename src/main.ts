@@ -221,3 +221,25 @@ if (document.readyState === 'loading') {
   setTimeout(reportHeight, 1500);
   window.addEventListener('resize', reportHeight);
 }
+
+// --- Iframe auto-resize: report height to parent ---
+(function reportHeight() {
+  if (window.parent === window) return; // not in iframe
+  let lastH = 0;
+  const send = () => {
+    const h = document.documentElement.scrollHeight;
+    if (h !== lastH) {
+      lastH = h;
+      window.parent.postMessage({ type: 'cha-resize', height: h }, '*');
+    }
+  };
+  // observe body for layout changes
+  if (typeof ResizeObserver !== 'undefined') {
+    new ResizeObserver(send).observe(document.body);
+  }
+  // also send periodically for safety (scale changes, etc.)
+  setInterval(send, 500);
+  // initial send after render
+  setTimeout(send, 300);
+  setTimeout(send, 1000);
+})();
