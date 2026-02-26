@@ -62,13 +62,20 @@
     -webkit-overflow-scrolling: touch;
 }
 
-/* When embedded in iframe, don't use 100vh (causes feedback loop) */
-@media (display-mode: browser) {
-    /* fallback */
+/* When embedded in iframe: no internal scroll, parent page handles scrolling */
+.cha-in-iframe,
+.cha-in-iframe body {
+    overflow: hidden !important;
+    height: auto !important;
 }
-/* The JS will add .cha-in-iframe class when inside iframe */
+
 .cha-in-iframe .cha-wrapper {
     min-height: auto;
+    overflow: visible;
+}
+
+.cha-in-iframe .cha-bg {
+    position: absolute;
 }
 
 /* ============================================================

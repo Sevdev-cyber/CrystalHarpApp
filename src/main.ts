@@ -190,17 +190,16 @@ class CrystalHarpApp {
 // --- App initialization ---
 const app = new CrystalHarpApp();
 
-// --- Iframe auto-resize: report actual content height to parent ---
-function setupIframeResize() {
+// --- Iframe integration: resize + scroll forwarding ---
+function setupIframeIntegration() {
   if (window.parent === window) return; // not in iframe
 
-  // Mark html so CSS can disable min-height:100vh
+  // Mark html so CSS can disable min-height:100vh and hide overflow
   document.documentElement.classList.add('cha-in-iframe');
 
+  // --- 1. Auto-resize: report content height to parent ---
   let lastH = 0;
-  const send = () => {
-    // Measure the actual wrapper content, not document.scrollHeight
-    // (scrollHeight grows with iframe size = feedback loop)
+  const sendHeight = () => {
     const wrapper = document.querySelector('.cha-wrapper');
     if (!wrapper) return;
     const h = wrapper.scrollHeight;
@@ -210,26 +209,60 @@ function setupIframeResize() {
     }
   };
 
-  // Observe wrapper for layout changes
   if (typeof ResizeObserver !== 'undefined') {
     const wrapper = document.querySelector('.cha-wrapper');
-    if (wrapper) new ResizeObserver(send).observe(wrapper);
+    if (wrapper) new ResizeObserver(sendHeight).observe(wrapper);
   }
-  // Periodic check for scale changes, etc.
-  setInterval(send, 800);
-  // Initial sends after render settles
-  setTimeout(send, 400);
-  setTimeout(send, 1200);
+  setInterval(sendHeight, 800);
+  setTimeout(sendHeight, 400);
+  setTimeout(sendHeight, 1200);
+
+  // --- 2. Forward scroll events to parent page ---
+  // Wheel events (desktop)
+  window.addEventListener('wheel', (e: WheelEvent) => {
+    window.parent.postMessage({
+      type: 'cha-scroll',
+      deltaY: e.deltaY,
+      deltaX: e.deltaX
+    }, '*');
+  }, { passive: true });
+
+  // Touch events (mobile) - track movement and forward
+  let touchStartY = 0;
+  let touchActive = false;
+
+  window.addEventListener('touchstart', (e: TouchEvent) => {
+    if (e.touches.length === 1) {
+      touchStartY = e.touches[0].clientY;
+      touchActive = true;
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchmove', (e: TouchEvent) => {
+    if (!touchActive || e.touches.length !== 1) return;
+    const deltaY = touchStartY - e.touches[0].clientY;
+    touchStartY = e.touches[0].clientY;
+    if (Math.abs(deltaY) > 1) {
+      window.parent.postMessage({
+        type: 'cha-scroll',
+        deltaY: deltaY,
+        deltaX: 0
+      }, '*');
+    }
+  }, { passive: true });
+
+  window.addEventListener('touchend', () => {
+    touchActive = false;
+  }, { passive: true });
 }
 
 // Wait for DOM
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     app.init();
-    setupIframeResize();
+    setupIframeIntegration();
   });
 } else {
   app.init();
-  setupIframeResize();
+  setupIframeIntegration();
 }
-
