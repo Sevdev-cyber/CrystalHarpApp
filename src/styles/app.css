@@ -62,6 +62,15 @@
     -webkit-overflow-scrolling: touch;
 }
 
+/* When embedded in iframe, don't use 100vh (causes feedback loop) */
+@media (display-mode: browser) {
+    /* fallback */
+}
+/* The JS will add .cha-in-iframe class when inside iframe */
+.cha-in-iframe .cha-wrapper {
+    min-height: auto;
+}
+
 /* ============================================================
    BACKGROUND ORBS
    ============================================================ */
@@ -604,7 +613,7 @@
         transform 0.15s ease,
         box-shadow 0.3s ease;
     user-select: none;
-    touch-action: none;
+    touch-action: pan-y;
     display: flex;
     flex-direction: row;
     align-items: center;

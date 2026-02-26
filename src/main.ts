@@ -185,61 +185,51 @@ class CrystalHarpApp {
   }
 }
 
-// --- Iframe height reporting (auto-resize when embedded) ---
-let lastReportedHeight = 0;
-let reportTimer: ReturnType<typeof setTimeout> | null = null;
 
-function reportHeight(): void {
-  if (window.parent === window) return; // not in iframe
-  if (reportTimer) return; // already scheduled
-  reportTimer = setTimeout(() => {
-    reportTimer = null;
-    const wrapper = document.querySelector('.cha-wrapper');
-    const height = wrapper ? wrapper.scrollHeight : document.body.scrollHeight;
-    // Only report if height actually changed (avoid infinite loop)
-    if (Math.abs(height - lastReportedHeight) > 5) {
-      lastReportedHeight = height;
-      window.parent.postMessage({ type: 'crystal-harp-height', height }, '*');
-    }
-  }, 200);
-}
 
 // --- App initialization ---
 const app = new CrystalHarpApp();
+
+// --- Iframe auto-resize: report actual content height to parent ---
+function setupIframeResize() {
+  if (window.parent === window) return; // not in iframe
+
+  // Mark html so CSS can disable min-height:100vh
+  document.documentElement.classList.add('cha-in-iframe');
+
+  let lastH = 0;
+  const send = () => {
+    // Measure the actual wrapper content, not document.scrollHeight
+    // (scrollHeight grows with iframe size = feedback loop)
+    const wrapper = document.querySelector('.cha-wrapper');
+    if (!wrapper) return;
+    const h = wrapper.scrollHeight;
+    if (h !== lastH && h > 100) {
+      lastH = h;
+      window.parent.postMessage({ type: 'cha-resize', height: h }, '*');
+    }
+  };
+
+  // Observe wrapper for layout changes
+  if (typeof ResizeObserver !== 'undefined') {
+    const wrapper = document.querySelector('.cha-wrapper');
+    if (wrapper) new ResizeObserver(send).observe(wrapper);
+  }
+  // Periodic check for scale changes, etc.
+  setInterval(send, 800);
+  // Initial sends after render settles
+  setTimeout(send, 400);
+  setTimeout(send, 1200);
+}
 
 // Wait for DOM
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     app.init();
-    setTimeout(reportHeight, 500);
-    setTimeout(reportHeight, 1500);
-    window.addEventListener('resize', reportHeight);
+    setupIframeResize();
   });
 } else {
   app.init();
-  setTimeout(reportHeight, 500);
-  setTimeout(reportHeight, 1500);
-  window.addEventListener('resize', reportHeight);
+  setupIframeResize();
 }
 
-// --- Iframe auto-resize: report height to parent ---
-(function reportHeight() {
-  if (window.parent === window) return; // not in iframe
-  let lastH = 0;
-  const send = () => {
-    const h = document.documentElement.scrollHeight;
-    if (h !== lastH) {
-      lastH = h;
-      window.parent.postMessage({ type: 'cha-resize', height: h }, '*');
-    }
-  };
-  // observe body for layout changes
-  if (typeof ResizeObserver !== 'undefined') {
-    new ResizeObserver(send).observe(document.body);
-  }
-  // also send periodically for safety (scale changes, etc.)
-  setInterval(send, 500);
-  // initial send after render
-  setTimeout(send, 300);
-  setTimeout(send, 1000);
-})();
